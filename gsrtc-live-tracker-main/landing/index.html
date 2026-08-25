@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en-IN" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>GSRTC Live Bus Tracking — Track Any Gujarat ST Bus on a Map | ST Tracker</title>
+<meta name="description" content="Track any Gujarat ST (GSRTC) bus live on a map by its number plate. See where it is now, when it reaches your stop, full timetables between any two stations, and alerts before it arrives. Free, no ads, no account.">
+
+<link rel="canonical" href="https://gsrtc.shivrajsinh.in/">
+<link rel="alternate" hreflang="en-IN" href="https://gsrtc.shivrajsinh.in/">
+<link rel="alternate" hreflang="gu-IN" href="https://gsrtc.shivrajsinh.in/?lang=gu">
+<link rel="alternate" hreflang="x-default" href="https://gsrtc.shivrajsinh.in/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ST Tracker">
+<meta property="og:url" content="https://gsrtc.shivrajsinh.in/">
+<meta property="og:title" content="GSRTC Live Bus Tracking — Track Any Gujarat ST Bus on a Map">
+<meta property="og:description" content="Type a number plate, watch the bus move, know when it reaches your stop. Free, no ads, no account.">
+<meta property="og:image" content="https://gsrtc.shivrajsinh.in/icons/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:locale" content="en_IN">
+<meta property="og:locale:alternate" content="gu_IN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GSRTC Live Bus Tracking — ST Tracker">
+<meta name="twitter:description" content="Track any Gujarat ST bus live on a map. Free, no ads, no account.">
+<meta name="twitter:image" content="https://gsrtc.shivrajsinh.in/icons/icon-512.png">
+
+<meta name="theme-color" content="#12203a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f8fb" media="(prefers-color-scheme: light)">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- The app is on a different host, so warm that connection while the page is still reading. -->
+<link rel="preconnect" href="https://tracker.shivrajsinh.in">
+<link rel="dns-prefetch" href="https://tracker.shivrajsinh.in">
+<link rel="stylesheet" href="styles.css?v=1">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "ST Tracker",
+  "alternateName": [
+    "GSRTC Live Tracker",
+    "Gujarat ST Bus Tracker",
+    "GSRTC બસ ટ્રેકર"
+  ],
+  "url": "https://tracker.shivrajsinh.in",
+  "installUrl": "https://tracker.shivrajsinh.in",
+  "applicationCategory": "TravelApplication",
+  "operatingSystem": "Android, iOS, Windows, macOS — any modern browser",
+  "inLanguage": [
+    "en-IN",
+    "gu-IN"
+  ],
+  "description": "Track any Gujarat ST (GSRTC) bus live on a map by its number plate. See where it is now, when it reaches your stop, timetables between any two stations, and alerts before it arrives.",
+  "featureList": [
+    "Live bus location by number plate",
+    "Stop-by-stop route with real arrival times",
+    "Timetable search between any two of 19,026 stations",
+    "Nearby bus stations on a map",
+    "Arrival alerts before the bus reaches your stop",
+    "Crowd reports on how full each bus is",
+    "Works offline once installed",
+    "English and Gujarati"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Person",
+    "name": "Shivrajsinh Zala",
+    "url": "https://shivrajsinh.in"
+  },
+  "areaServed": {
+    "@type": "State",
+    "name": "Gujarat",
+    "containedInPlace": {
+      "@type": "Country",
+      "name": "India"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is this the official GSRTC app?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ST Tracker is an independent tool built for Gujarat ST commuters. It shows the same live bus positions the operator publishes, in a form that is quicker to read at a bus stop. It is not affiliated with GSRTC."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the live location?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Positions come from the GPS unit on the bus itself, refreshed every few seconds while the bus is on a trip. Arrival estimates are worked out from that position against the timetable, and the app stays silent rather than showing a number it cannot support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why can I not find my bus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The operator only reports a position while a bus is actually running a trip. A bus parked at the depot, or one that finished its run, will not appear until it sets off again."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on iPhone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Open it in Safari, tap Share, then Add to Home Screen. It then runs full screen like an installed app. Arrival notifications on iPhone need it installed to the home screen first."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and there are no adverts, no subscription and no account. It is run as a public utility for Gujarat commuters."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it available in Gujarati?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The whole app and this page are available in Gujarati, including station and route names where the operator provides them."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": "https://gsrtc.shivrajsinh.in",
+  "name": "ST Tracker",
+  "inLanguage": "en-IN",
+  "publisher": {
+    "@type": "Person",
+    "name": "Shivrajsinh Zala",
+    "url": "https://shivrajsinh.in"
+  }
+}
+</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="brand" href="/" aria-label="ST Tracker home">
+    <img src="icons/icon.svg" alt="" width="30" height="30" decoding="async">
+    <span><b>ST Tracker</b><small data-i18n="brandSub">Gujarat ST buses, live</small></span>
+  </a>
+  <nav class="bar-nav" aria-label="Sections">
+    <a href="#features" data-i18n="navFeatures">Features</a>
+    <a href="#how" data-i18n="navHow">How it works</a>
+    <a href="#routes" data-i18n="navRoutes">Routes</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="bar-end">
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Change theme" title="Theme">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <circle class="t-sun" cx="12" cy="12" r="4.2"/>
+        <g class="t-sun"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></g>
+        <path class="t-moon" d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/>
+      </svg>
+    </button>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="gu" aria-pressed="false" lang="gu">ગુજરાતી</button>
+    </div>
+    <a class="btn primary sm" href="https://tracker.shivrajsinh.in" data-i18n="openApp">Open the app</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <p class="eyebrow" data-i18n="eyebrow">Free · No ads · No account</p>
+      <h1 data-i18n="h1">Track any Gujarat ST bus, live on a map</h1>
+      <p class="lede" data-i18n="lede">Type a number plate and watch the bus move. See which stop it has just left, how fast it is going, and when it will reach you — built for the people who actually wait at the stop.</p>
+
+      <form class="plate" id="plate-form">
+        <label class="sr" for="plate" data-i18n="plateLabel">Bus number plate</label>
+        <input id="plate" name="plate" type="text" inputmode="latin" autocomplete="off"
+               placeholder="GJ-18-ZT-1028" aria-describedby="plate-hint">
+        <button class="btn primary" type="submit" data-i18n="track">Track</button>
+      </form>
+      <p class="hint" id="plate-hint" data-i18n="plateHint">Opens the live map for that bus. Try the example if you don't have a plate handy.</p>
+    </div>
+
+    <div class="hero-art reveal" aria-hidden="true">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="mini-bar"><span class="dot live"></span><b>GJ-18-ZT-1028</b></div>
+          <svg class="route" viewBox="0 0 260 300" role="img" aria-label="">
+            <path class="road" d="M40 280 C 60 210, 120 200, 130 150 S 190 70, 220 24"/>
+            <path class="road-done" d="M40 280 C 60 210, 120 200, 130 150 S 190 70, 220 24"/>
+            <circle class="stop" cx="40" cy="280" r="5"/>
+            <circle class="stop" cx="130" cy="150" r="5"/>
+            <circle class="stop" cx="220" cy="24" r="5"/>
+            <g class="bus-marker"><circle r="13"/><text y="4">▮</text></g>
+          </svg>
+          <div class="mini-stats">
+            <div><b>4 min</b><small data-i18n="miniNext">next stop</small></div>
+            <div><b>46 km/h</b><small data-i18n="miniSpeed">speed</small></div>
+            <div><b>2.1 km</b><small data-i18n="miniAway">from you</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="strip">
+  <div class="wrap strip-grid">
+    <div><b data-count="8554">8,554</b><span data-i18n="statBuses">buses in the fleet</span></div>
+    <div><b data-count="19026">19,026</b><span data-i18n="statStations">stations covered</span></div>
+    <div><b data-i18n="statLive">Live</b><span data-i18n="statLiveSub">positions every few seconds</span></div>
+    <div><b>2</b><span data-i18n="statLang">languages, English and Gujarati</span></div>
+  </div>
+</section>
+
+<section id="features" class="wrap section">
+  <h2 data-i18n="featuresH">Everything a commuter actually needs</h2>
+  <p class="sub" data-i18n="featuresSub">Not a timetable board. A live picture of where your bus is right now.</p>
+
+  <div class="cards">
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10.5" r="2.6"/><path d="M20 10.5c0 5.8-8 11.5-8 11.5s-8-5.7-8-11.5a8 8 0 1 1 16 0z"/></svg></span>
+      <h3 data-i18n="f1H">Live location by number plate</h3>
+      <p data-i18n="f1P">Enter the plate written on the bus. You get its position on the map, the stop it just passed, the one it is heading to, its speed, and how far it is from you.</p>
+    </article>
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.4 6H14a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h5.6"/></svg></span>
+      <h3 data-i18n="f2H">The whole route, stop by stop</h3>
+      <p data-i18n="f2P">See every stop on the line with the time the bus actually reached each one, which stops are behind it, and which are still ahead.</p>
+    </article>
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/></svg></span>
+      <h3 data-i18n="f3H">Timetables between any two stations</h3>
+      <p data-i18n="f3P">Search Ahmedabad to Rajkot, Rajkot to Morbi, or any pair of the 19,026 stations. Filter by service type, sort by departure or journey time, and see buses that have already left in case you are boarding further along.</p>
+    </article>
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 1 0-12 0c0 5.2-2 6.5-2 6.5h16s-2-1.3-2-6.5z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg></span>
+      <h3 data-i18n="f4H">Alerts before it reaches you</h3>
+      <p data-i18n="f4P">Pick the stop you are waiting at. Your phone tells you when the bus is close, so you can stay inside until it is worth walking out.</p>
+    </article>
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.8a3.4 3.4 0 0 0-3.4-3.4H6.4A3.4 3.4 0 0 0 3 18.2V20"/><circle cx="9.5" cy="7.4" r="3.4"/><path d="M21 20v-1.8a3.4 3.4 0 0 0-2.6-3.3M15.6 4.2a3.4 3.4 0 0 1 0 6.4"/></svg></span>
+      <h3 data-i18n="f5H">How full the bus is</h3>
+      <p data-i18n="f5P">Riders report whether there are seats, whether people are standing, and whether a bus never came or was replaced. You see it on the departure list before you choose which one to wait for.</p>
+    </article>
+    <article class="card reveal">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1a12 12 0 0 1 10 3.2M5 8.3a12 12 0 0 1 2.3-1.7M2.5 11.7a9 9 0 0 1 3-2M8.5 15a5 5 0 0 1 6.2-.6"/><path d="M12 19.5h.01"/></svg></span>
+      <h3 data-i18n="f6H">Works when the signal does not</h3>
+      <p data-i18n="f6P">Install it to your home screen and it opens full screen, starts instantly, and still shows the last position it knew when you go through a dead patch.</p>
+    </article>
+  </div>
+</section>
+
+<section id="screens" class="wrap section">
+  <h2 data-i18n="screensH">What it looks like</h2>
+  <p class="sub" data-i18n="screensSub">Three screens do most of the work. Everything below is the real interface, in the theme you are reading this in.</p>
+
+  <div class="screens">
+    <figure class="shot reveal">
+      <picture>
+        <source srcset="screens/track-dark.webp" media="(prefers-color-scheme: dark)">
+        <img class="device" src="screens/track-light.webp" alt="The ST Tracker Track screen: a live Gujarat ST bus on the map with its next stop, speed and distance from you."
+             width="560" height="1204" loading="eager" decoding="async">
+      </picture>
+      <figcaption data-i18n="shot1">Track — where the bus is, and when it reaches you</figcaption>
+    </figure>
+
+    <figure class="shot reveal">
+      <picture>
+        <source srcset="screens/routes-dark.webp" media="(prefers-color-scheme: dark)">
+        <img class="device" src="screens/routes-light.webp" alt="The Routes screen: live GSRTC departures from Rajkot to Morbi with running status and countdowns."
+             width="560" height="1204" loading="lazy" decoding="async">
+      </picture>
+      <figcaption data-i18n="shot2">Routes — every departure, and how full each one is</figcaption>
+    </figure>
+
+    <figure class="shot reveal">
+      <picture>
+        <source srcset="screens/nearby-dark.webp" media="(prefers-color-scheme: dark)">
+        <img class="device" src="screens/nearby-light.webp" alt="The Nearby screen: ST bus stations around your location, shown on a map with distances."
+             width="560" height="1204" loading="lazy" decoding="async">
+      </picture>
+      <figcaption data-i18n="shot3">Nearby — the stops around you, on the map</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="how" class="band">
+  <div class="wrap section">
+    <h2 data-i18n="howH">Three taps, no sign-up</h2>
+    <ol class="steps">
+      <li class="reveal"><b data-i18n="s1H">Open it</b><span data-i18n="s1P">No account, no email, no app store. It runs in the browser and installs to your home screen if you want it there.</span></li>
+      <li class="reveal"><b data-i18n="s2H">Type the plate, or pick your route</b><span data-i18n="s2P">Track one bus by its number, or search between two stations and pick from the departures.</span></li>
+      <li class="reveal"><b data-i18n="s3H">Watch it come</b><span data-i18n="s3P">The map follows the bus. Choose your stop and it will tell you when to walk out.</span></li>
+    </ol>
+    <p class="cta-row"><a class="btn primary lg" href="https://tracker.shivrajsinh.in" data-i18n="openApp2">Open the app</a></p>
+  </div>
+</section>
+
+<section id="routes" class="wrap section">
+  <h2 data-i18n="routesH">Popular GSRTC routes</h2>
+  <p class="sub" data-i18n="routesSub">Live departures and timetables, one tap away.</p>
+  <ul class="chips" id="route-list">
+    <li><a href="https://tracker.shivrajsinh.in/?from=470&amp;to=462&amp;fromName=Rajkot&amp;toName=Morbi">Rajkot → Morbi</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=462&amp;to=470&amp;fromName=Morbi&amp;toName=Rajkot">Morbi → Rajkot</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=464&amp;to=470&amp;fromName=Ahmedabad&amp;toName=Rajkot">Ahmedabad → Rajkot</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=470&amp;to=464&amp;fromName=Rajkot&amp;toName=Ahmedabad">Rajkot → Ahmedabad</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=464&amp;to=505&amp;fromName=Ahmedabad&amp;toName=Surat">Ahmedabad → Surat</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=470&amp;to=497&amp;fromName=Rajkot&amp;toName=Jamnagar">Rajkot → Jamnagar</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=464&amp;to=594&amp;fromName=Ahmedabad&amp;toName=Bhuj">Ahmedabad → Bhuj</a></li>
+    <li><a href="https://tracker.shivrajsinh.in/?from=470&amp;to=1052&amp;fromName=Rajkot&amp;toName=Junagadh">Rajkot → Junagadh</a></li>
+  </ul>
+</section>
+
+<section id="faq" class="band">
+  <div class="wrap section narrow">
+    <h2 data-i18n="faqH">Questions people ask</h2>
+    <div class="faq">
+      <details class="reveal" name="faq"><summary data-i18n="q1">Is this the official GSRTC app?</summary>
+        <p data-i18n="a1">No. ST Tracker is an independent tool built for Gujarat ST commuters. It shows the same live bus positions the operator publishes, in a form that is quicker to read at a bus stop. It is not affiliated with GSRTC.</p></details>
+      <details class="reveal" name="faq"><summary data-i18n="q2">How accurate is the live location?</summary>
+        <p data-i18n="a2">Positions come from the GPS unit on the bus itself, refreshed every few seconds while the bus is on a trip. Arrival estimates are worked out from that position against the timetable, and the app stays silent rather than showing a number it cannot support.</p></details>
+      <details class="reveal" name="faq"><summary data-i18n="q3">Why can I not find my bus?</summary>
+        <p data-i18n="a3">The operator only reports a position while a bus is actually running a trip. A bus parked at the depot, or one that finished its run, will not appear until it sets off again.</p></details>
+      <details class="reveal" name="faq"><summary data-i18n="q4">Does it work on iPhone?</summary>
+        <p data-i18n="a4">Yes. Open it in Safari, tap Share, then Add to Home Screen. It then runs full screen like an installed app. Arrival notifications on iPhone need it installed to the home screen first.</p></details>
+      <details class="reveal" name="faq"><summary data-i18n="q5">Is it free?</summary>
+        <p data-i18n="a5">Yes, and there are no adverts, no subscription and no account. It is run as a public utility for Gujarat commuters.</p></details>
+      <details class="reveal" name="faq"><summary data-i18n="q6">Is it available in Gujarati?</summary>
+        <p data-i18n="a6">Yes. The whole app and this page are available in Gujarati, including station and route names where the operator provides them.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="wrap section closer">
+  <h2 data-i18n="closerH">Stop guessing where the bus is</h2>
+  <p class="sub" data-i18n="closerP">It takes one tap and costs nothing.</p>
+  <a class="btn primary lg" href="https://tracker.shivrajsinh.in" data-i18n="openApp3">Open ST Tracker</a>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <p><b>ST Tracker</b><br><span data-i18n="footTag">Live tracking for Gujarat ST (GSRTC) buses.</span></p>
+    <nav aria-label="Footer">
+      <a href="https://tracker.shivrajsinh.in" data-i18n="footApp">Open the app</a>
+      <a href="https://tracker.shivrajsinh.in/privacy.html" data-i18n="footPrivacy">Privacy</a>
+      <a href="https://shivrajsinh.in" rel="me">shivrajsinh.in</a>
+      <a href="https://buymeacoffee.com/shivrajsinh.sh" rel="noopener" data-i18n="footCoffee">Buy me a coffee</a>
+    </nav>
+    <p class="fine" data-i18n="footFine">An independent project, not affiliated with or endorsed by GSRTC or the Government of Gujarat.</p>
+  </div>
+</footer>
+
+<script src="app.js?v=1" defer></script>
+</body>
+</html>

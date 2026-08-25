@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gsrtc.shivrajsinh.in/sitemap.xml

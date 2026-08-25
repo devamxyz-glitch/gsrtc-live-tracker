@@ -1,0 +1,33 @@
+{
+  "name": "st-tracker",
+  "version": "1.46.2",
+  "description": "Live tracker for Gujarat ST (GSRTC) buses — built for daily commuters.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/proxy.mjs",
+    "proxy": "node server/proxy.mjs",
+    "verify": "tsx scripts/verify.ts",
+    "icons": "bash scripts/build-icons.sh",
+    "check": "node --check server/proxy.mjs && node --check server/upstream.mjs && tsc --noEmit && npm test && node scripts/qa.mjs",
+    "test": "node --test scripts/test-insight.mjs scripts/test-push.mjs scripts/test-reports.mjs scripts/test-admin-page.mjs scripts/test-references.mjs scripts/test-i18n.mjs scripts/test-imports.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "loadtest": "node scripts/loadtest.mjs",
+    "deploy": "bash scripts/redeploy.sh",
+    "release": "node scripts/release.mjs",
+    "qa": "node scripts/qa.mjs"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

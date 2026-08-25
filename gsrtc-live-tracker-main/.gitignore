@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# secrets and runtime state
+.env
+.env.local
+.data/
+
+# TWA build output and signing key — never commit these
+twa/android.keystore
+twa/*.aab
+twa/*.apk
+twa/app/
+twa/.gradle/
+twa/build/
+twa/store_icon.png

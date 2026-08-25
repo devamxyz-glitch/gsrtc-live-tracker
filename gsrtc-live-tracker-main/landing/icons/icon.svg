@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ST Tracker">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B3C77"/>
+      <stop offset="1" stop-color="#0C1E3E"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E4E9F2"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+  <!-- road curve -->
+  <path d="M52 470 C 140 470 150 300 256 300 C 362 300 372 470 460 470"
+        fill="none" stroke="#FFFFFF" stroke-opacity=".10" stroke-width="26" stroke-linecap="round"/>
+  <!-- bus body -->
+  <rect x="146" y="96" width="220" height="272" rx="50" fill="url(#body)"/>
+  <!-- destination board -->
+  <rect x="176" y="126" width="160" height="28" rx="14" fill="#E8912F"/>
+  <!-- windscreen -->
+  <rect x="176" y="172" width="160" height="84" rx="24" fill="#12305F"/>
+  <!-- headlights -->
+  <circle cx="200" cy="308" r="17" fill="#E8912F"/>
+  <circle cx="312" cy="308" r="17" fill="#E8912F"/>
+  <!-- wheels -->
+  <rect x="164" y="360" width="52" height="34" rx="17" fill="#0A1730"/>
+  <rect x="296" y="360" width="52" height="34" rx="17" fill="#0A1730"/>
+  <!-- live signal -->
+  <circle cx="412" cy="100" r="46" fill="#0C1E3E"/>
+  <circle cx="412" cy="100" r="30" fill="#12B76A"/>
+</svg>

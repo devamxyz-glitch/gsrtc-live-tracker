@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "st-tracker", "runtimeExecutable": "node", "runtimeArgs": ["server/proxy.mjs"], "port": 8787 }
+  ]
+}

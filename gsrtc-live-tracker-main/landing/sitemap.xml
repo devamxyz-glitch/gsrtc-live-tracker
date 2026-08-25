@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://gsrtc.shivrajsinh.in/</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://gsrtc.shivrajsinh.in/"/>
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://gsrtc.shivrajsinh.in/?lang=gu"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gsrtc.shivrajsinh.in/"/>
+  </url>
+  <url>
+    <loc>https://gsrtc.shivrajsinh.in/?lang=gu</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://gsrtc.shivrajsinh.in/"/>
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://gsrtc.shivrajsinh.in/?lang=gu"/>
+  </url>
+</urlset>

@@ -1,0 +1,1415 @@
+/* ST Tracker — design system.
+   Navy is the action colour, saffron the accent, emerald reserved for "this is live".
+   Everything is token-driven so light/dark stay in sync. No icon fonts, no emoji. */
+
+/* ---------------------------------------------------------------- tokens */
+:root {
+  --bg: #f5f7fa;
+  --bg-grad: radial-gradient(1200px 420px at 50% -180px, #e6ecf8 0%, transparent 70%);
+  --surface: #ffffff;
+  --surface-2: #f1f3f8;
+  --surface-3: #e6eaf2;
+  --ink: #0f172a;
+  --ink-2: #4a5568;
+  --ink-3: #78839a;
+  --line: #e2e7f0;
+  --line-2: #edf0f6;
+
+  --brand: #1b3c77;
+  --brand-2: #2b5aa8;
+  --brand-ink: #ffffff;
+  --brand-soft: #e9eff9;
+  --brand-soft-ink: #1b3c77;
+
+  --accent: #a8590a;
+  --accent-bg: #e8912f;
+  --accent-soft: #fcefdd;
+
+  --live: #05704a;
+  --live-dot: #12b76a;
+  --live-soft: #e2f5ec;
+
+  --warn: #9a4b06;
+  --warn-soft: #fdefe0;
+  --danger: #a52218;
+  --danger-soft: #fdecea;
+
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, .05);
+  --shadow-2: 0 1px 3px rgba(16, 24, 40, .07), 0 8px 24px -8px rgba(16, 24, 40, .12);
+  --shadow-3: 0 12px 40px -12px rgba(16, 24, 40, .28);
+
+  --r-lg: 18px;
+  --r: 14px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+
+  --tap: 44px;
+  --gut: 16px;
+
+  /* Stacking order, named once. Values are only ever compared against each other; the map
+     sits at the floor because Leaflet positions its own container and would otherwise paint
+     over anything declared before it. */
+  --z-map: 0;
+  --z-field: 1;
+  --z-swap: 3;
+  --z-field-open: 50;   /* the field whose dropdown is open must clear its own siblings */
+  --z-dropdown: 5;      /* inside an open field, above that field's own controls */
+  --z-header: 60;
+  --z-tabbar: 90;
+  --z-install: 100;     /* a passive suggestion: above the tabbar, below anything that asks */
+  --z-sheet: 200;
+  --z-toast: 300;
+  --z-offline: 400;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 22px;
+  --maxw: 780px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Gujarati",
+          "Helvetica Neue", Arial, sans-serif;
+
+  /* Every size in this file is calc(Npx * var(--step)), so this one number is the whole type
+     scale. The original default of 1 put body text at 15px, which is too small to read at a
+     bus stop in daylight — and left form inputs under 16px, which makes iOS zoom the page
+     every time one is focused. */
+  --step: 1.07;
+}
+
+/**
+ * Dark mode is a neutral charcoal, not a navy.
+ *
+ * The first version tinted every surface, every line and even the body text toward the brand
+ * blue (~215deg across the board), which read as "the whole app is blue" rather than "the app
+ * is dark". Blue now appears only where it means something: the action colour and the map.
+ * The greys carry the faintest cool lean — pure neutral grey looks dead on an OLED screen —
+ * but nowhere near enough to register as a colour.
+ */
+[data-theme="dark"] {
+  --bg: #0e1013;
+  --bg-grad: radial-gradient(1200px 420px at 50% -200px, #191c21 0%, transparent 70%);
+  --surface: #17191d;
+  --surface-2: #1e2126;
+  --surface-3: #2a2e34;
+  --ink: #edeef0;
+  --ink-2: #a8abb2;
+  --ink-3: #7a7e86;
+  --line: #2b2f36;
+  --line-2: #212429;
+
+  --brand: #7ea6f0;
+  --brand-2: #9dbcff;
+  --brand-ink: #10131a;
+  --brand-soft: #1e2530;
+  --brand-soft-ink: #b3caf5;
+
+  --accent: #f0a44b;
+  --accent-bg: #e8912f;
+  --accent-soft: #2b2015;
+
+  --live: #3ddda4;
+  --live-dot: #12b76a;
+  --live-soft: #14241d;
+
+  --warn: #f2b25c;
+  --warn-soft: #2a2214;
+  --danger: #ff8f85;
+  --danger-soft: #2b1a18;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-2: 0 1px 3px rgba(0, 0, 0, .5), 0 8px 24px -8px rgba(0, 0, 0, .6);
+  --shadow-3: 0 12px 40px -12px rgba(0, 0, 0, .8);
+}
+
+[data-text="large"] { --step: 1.2; }
+
+/* ---------------------------------------------------------------- base */
+* { box-sizing: border-box; }
+
+/* The `hidden` attribute only sets `display: none` at UA-stylesheet strength, so any explicit
+   display — `.row { display: flex }`, for one — silently overrides it and the element stays on
+   screen with no sign anything is wrong. Make the attribute mean what it says. */
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+
+body {
+  font-family: var(--font);
+  font-size: calc(15px * var(--step));
+  line-height: 1.45;
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  background-repeat: no-repeat;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+svg.i { width: 20px; height: 20px; display: block; flex: none; }
+svg.i-sm { width: 16px; height: 16px; }
+svg.i-xs { width: 12px; height: 12px; }
+svg.i-lg { width: 24px; height: 24px; }
+
+/* ---------------------------------------------------------------- header */
+.app-header {
+  position: sticky; top: 0; z-index: var(--z-header);
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(env(safe-area-inset-top) + 10px) var(--gut) 10px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.app-header .mark { width: 30px; height: 30px; border-radius: 9px; flex: none; }
+.app-header .titles { min-width: 0; }
+.app-header h1 { margin: 0; font-size: calc(16px * var(--step)); font-weight: 700; letter-spacing: -.2px; }
+.app-header .sub { font-size: calc(11px * var(--step)); color: var(--ink-3); margin-top: -2px; }
+.app-header .spacer { margin-left: auto; }
+
+.iconbtn {
+  width: var(--tap); height: var(--tap); border-radius: var(--r-sm);
+  border: 1px solid transparent; background: transparent; color: var(--ink-2);
+  display: grid; place-items: center;
+}
+.iconbtn:hover { background: var(--surface-2); }
+.iconbtn:active { transform: scale(.94); }
+.iconbtn.bordered { border-color: var(--line); background: var(--surface); }
+
+/* ---------------------------------------------------------------- layout */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: var(--space-3) var(--gut) 104px; }
+
+/**
+ * Vertical rhythm.
+ *
+ * Spacing belongs to the container, not to each component: a card that carries its own
+ * margin-bottom fights every context it is dropped into, which is how the same list ended up
+ * with three different gaps. `.flow` owns the gap between stacked blocks; a section heading
+ * opens a wider one. Nothing inside should set its own outer margin.
+ */
+.flow > * + * { margin-top: var(--space-2); }
+/* A paragraph's own browser margin competes with the container's rhythm and produces a
+   different gap above and below it than between any other pair — the container owns spacing
+   here, so the component gives it up. */
+.flow > p { margin: 0; }
+/* A form's submit sits further from its input than two paragraphs sit from each other; at the
+   same 10px it reads as attached to the field rather than as the next step. */
+.flow > .btn.block { margin-top: var(--space-3); }
+.flow > .sec-title { margin-top: var(--space-4); }
+.flow > .sec-title:first-child { margin-top: 0; }
+.flow > .map, .flow > .map-wrap { margin-top: var(--space-3); }
+
+.screen { display: none; }
+.screen.on { display: block; animation: rise .22s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.sec-title {
+  display: flex; align-items: center; gap: 8px; min-height: 26px;
+  font-size: calc(11.5px * var(--step)); font-weight: 700; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--ink-3);
+  margin: 0 2px;
+}
+/* A state, not an action — it should not look tappable. */
+.sec-title .state {
+  margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 600;
+  color: var(--live); display: inline-flex; align-items: center; gap: 5px;
+  font-size: calc(12.5px * var(--step));
+}
+.sec-title .act {
+  margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 600;
+  color: var(--brand); background: none; border: 0; padding: 4px 6px; font-size: calc(12.5px * var(--step));
+  display: inline-flex; align-items: center; gap: 5px;
+}
+
+.stack > * + * { margin-top: var(--space-2); }
+.row-date { margin-top: var(--space-2); }
+.row { display: flex; gap: 10px; align-items: stretch; }
+.row.tight { gap: 8px; }
+.grow { flex: 1; min-width: 0; }
+
+/* ---------------------------------------------------------------- controls */
+/*
+ * Leaflet positions its own map container, so without an explicit layer a map declared after a
+ * field would paint over that field's dropdown. Fields sit above the map — and the field the
+ * user is actually typing in is lifted above its *sibling* fields too, otherwise the "To" input
+ * below "From" would cover the list you are trying to pick from.
+ */
+.field { position: relative; z-index: var(--z-field); }
+/* Only `.open`, not `:focus-within`. A field needs to clear its siblings while it is showing a
+   list; merely being focused renders nothing that has to escape, and lifting it then painted
+   the focused field over the swap button sitting between the two, leaving half a circle. */
+.field.open { z-index: var(--z-field-open); }
+.map-wrap, .map { position: relative; z-index: var(--z-map); }
+.field > .lead {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-3); pointer-events: none;
+}
+.input {
+  width: 100%; min-height: var(--tap);
+  padding: 12px 14px 12px 42px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--surface); color: var(--ink);
+  /* Never below 16px: iOS Safari zooms the whole page when a smaller input takes focus,
+     and the rider then has to pinch back out to see the map. */
+  font-size: max(16px, calc(15.5px * var(--step)));
+  box-shadow: var(--shadow-1);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input.plain { padding-left: 14px; }
+.input::placeholder { color: var(--ink-3); }
+.input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.input.plate { text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
+
+select.input {
+  padding-left: 14px; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
+                    linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: var(--tap); padding: 0 18px;
+  border: 1px solid transparent; border-radius: var(--r);
+  background: var(--brand); color: var(--brand-ink);
+  font-weight: 650; font-size: calc(15px * var(--step)); white-space: nowrap;
+  box-shadow: var(--shadow-1); transition: transform .08s, filter .15s;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: translateY(1px); }
+.btn.block { width: 100%; }
+.btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); font-weight: 600; }
+.btn.ghost:hover { background: var(--surface-2); filter: none; }
+.btn.quiet { background: transparent; color: var(--brand); box-shadow: none; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: calc(13.5px * var(--step)); border-radius: var(--r-sm); }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.btn.on { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
+
+.chips {
+  display: flex; gap: 8px; overflow-x: auto;
+  margin-inline: calc(var(--gut) * -1);
+  padding: 2px var(--gut) 10px;
+  scroll-padding-inline: var(--gut);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chips:empty { display: none; }
+.chip {
+  flex: none; min-height: 36px; padding: 0 13px;
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: var(--surface); color: var(--ink-2);
+  font-size: calc(13px * var(--step)); font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+
+/* ---------------------------------------------------------------- cards */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-2); overflow: hidden;
+}
+.card.pad { padding: var(--space-3); }
+/* Only while a dropdown is open. `overflow: hidden` exists so the card's rounded corners clip
+   what is inside it, but it also cropped an autocomplete list to the height of the card. */
+.card.has-open-list { overflow: visible; }
+.card.flat { box-shadow: var(--shadow-1); }
+
+.tile {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px var(--space-3); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  transition: transform .08s, box-shadow .15s, border-color .15s;
+}
+.tile:hover { box-shadow: var(--shadow-2); border-color: var(--surface-3); }
+.tile:active { transform: scale(.995); }
+.tile .glyph {
+  width: 36px; height: 36px; border-radius: 11px; flex: none; align-self: flex-start;
+  margin-top: 2px;
+  display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-soft-ink);
+}
+.tile .glyph.accent { background: var(--accent-soft); color: var(--accent); }
+.tile .glyph.live { background: var(--live-soft); color: var(--live); }
+.tile .body { min-width: 0; flex: 1; }
+.tile .t1, .tile .t2, .tile .meta, .tile .end .big, .tile .end .small,
+.ac-item .t1, .ac-item .t2 { display: block; }
+/* Plate and status share a line so "which of these is actually running" scans in one pass. */
+.tile .line1 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tile .line1 .t1 { flex: 0 1 auto; min-width: 0; }
+.tile .line1 .badge { flex: none; }
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--live-dot); flex: none;
+  animation: pulse 1.8s ease-out infinite;
+}
+/* Same footprint for a scheduled service, so rows stay aligned down the column. */
+.live-dot.off { background: var(--surface-3); animation: none; }
+.tile .meta-live { color: var(--live); font-weight: 700; }
+.tile .meta-premium { color: var(--accent); font-weight: 650; }
+.tile .meta {
+  font-size: calc(12.5px * var(--step)); color: var(--ink-2); margin-top: 3px;
+  /* Wraps rather than truncates. On a 375px screen this line has about 150px and wants nearly
+     300 — so a rider was shown "Express · 1h 3…" and never the duration, the distance or the
+     seat count at all. Two short lines beat one cut in half, and it keeps the crowd chip from
+     buying its place at the expense of the facts beside it.
+     Left inline rather than made a flex row: the separators are bare text nodes, and each one
+     would become its own flex item with its own gap. */
+  /* Normal wrapping, no forced mid-word breaks — those split "56 seats" across two lines. */
+  white-space: normal;
+}
+.tile .end { text-align: right; align-items: center; }
+.tile .end .small { margin-top: 2px; }
+.tile .end .small.soon { color: var(--live); font-weight: 700; }
+.tile .end .small.gone { color: var(--ink-3); }
+.tile .t1 { font-weight: 650; font-size: calc(14.5px * var(--step)); letter-spacing: -.1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .t2 { font-size: calc(12.5px * var(--step)); color: var(--ink-3); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .end { flex: none; text-align: right; display: flex; align-items: center; gap: 8px; color: var(--ink-3); }
+.tile .end .big { font-weight: 700; font-size: calc(15px * var(--step)); color: var(--ink); }
+.tile .end .small { font-size: calc(11px * var(--step)); color: var(--ink-3); }
+
+/* ---------------------------------------------------------------- commute card */
+.commute-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--line-2);
+}
+.commute-title { background: none; border: 0; padding: 0; text-align: left; min-width: 0; }
+.commute-title .legs {
+  display: flex; align-items: center; gap: 7px;
+  font-weight: 700; font-size: calc(15.5px * var(--step)); letter-spacing: -.2px;
+  min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.commute-title .legs svg { color: var(--ink-3); }
+.commute-title .when {
+  display: block; font-size: calc(11.5px * var(--step)); color: var(--ink-3); margin-top: 2px;
+}
+
+/* A departure row: status, bus, then the two numbers that decide whether you run. */
+/* `.kv .k` is flex:none by default; a departure row's left side must shrink instead
+   of shoving the times off the card. */
+.kv .k.dep { display: flex; align-items: center; gap: 9px; flex: 1 1 auto; min-width: 0; }
+.dep-bus { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dep-bus .plate-sm { font-weight: 650; color: var(--ink); }
+.dep-service { color: var(--ink-3); }
+.dep-when { flex: none; text-align: right; }
+.dep-when .num { display: block; }
+.dep-when .small {
+  display: block; font-size: calc(11px * var(--step)); font-weight: 600; color: var(--ink-3); margin-top: 1px;
+}
+.dep-when .small.soon { color: var(--live); }
+.dep-when .small.gone { color: var(--ink-3); opacity: .7; }
+
+/* ---------------------------------------------------------------- badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 9px; border-radius: var(--r-pill);
+  font-size: calc(11.5px * var(--step)); font-weight: 700; letter-spacing: .1px;
+  background: var(--surface-2); color: var(--ink-2);
+}
+.badge.live { background: var(--live-soft); color: var(--live); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.danger { background: var(--danger-soft); color: var(--danger); }
+.badge.brand { background: var(--brand-soft); color: var(--brand-soft-ink); }
+.badge.accent { background: var(--accent-soft); color: var(--accent); }
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live-dot); flex: none; }
+.badge.live .dot { animation: pulse 1.8s ease-out infinite; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--live-dot) 60%, transparent); }
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tags.oneline { flex-wrap: nowrap; overflow: hidden; margin-top: 6px; }
+.tag {
+  font-size: calc(11px * var(--step)); font-weight: 600; padding: 3px 8px;
+  border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink-2);
+  border: 1px solid var(--line-2);
+}
+.tag.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.tag.live { background: var(--live-soft); color: var(--live); border-color: transparent; }
+
+/* ---------------------------------------------------------------- map */
+.map {
+  height: 44vh; min-height: 280px; border-radius: var(--r-lg); overflow: hidden;
+  border: 1px solid var(--line); box-shadow: var(--shadow-2); background: var(--surface-2);
+}
+.map.tall { height: 52vh; }
+/* A map embedded inside a flowing list, rather than as the page's main surface. */
+.map.map-inline { height: 210px; }
+/* A map that sits flush against the top of a sheet. */
+.map.map-flush { height: 210px; border-radius: 0; border-left: 0; border-right: 0; border-top: 0; }
+.map-wrap { position: relative; }
+.map-fabs {
+  /* Local to .map-wrap: only ever compared against the map beside it, whose own Leaflet
+     panes are sealed inside its stacking context. Not part of the global scale above. */
+  position: absolute; right: 10px; bottom: 10px; z-index: 500;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.map-fabs .iconbtn { background: var(--surface); border-color: var(--line); box-shadow: var(--shadow-2); }
+.leaflet-container { font-family: inherit; font-size: 12px; background: var(--surface-2); }
+.leaflet-control-attribution { font-size: 10px; padding: 0 4px; }
+.leaflet-control-attribution a { color: var(--ink-2); }
+.leaflet-control-zoom a {
+  background: var(--surface) !important; color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+.bus-pin {
+  position: relative;   /* the live ring in the motion section anchors to this */
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--brand); color: var(--brand-ink);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .35), 0 0 0 3px color-mix(in srgb, var(--brand) 26%, transparent);
+}
+.stop-pin {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); border: 3px solid var(--brand);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+}
+.stop-pin.done { border-color: var(--ink-3); }
+/* The stop the bus is standing at. Larger and filled, with a ring, so it reads as "the bus is
+   here" at a glance rather than as one more dot on a line of dots. */
+.stop-pin.at {
+  width: 20px; height: 20px; border-width: 4px;
+  border-color: var(--live-dot); background: var(--surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--live-dot) 28%, transparent),
+              0 1px 5px rgba(0, 0, 0, .35);
+}
+.me-pin {
+  width: 16px; height: 16px; border-radius: 50%; background: #2b7fff;
+  border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(43, 127, 255, .25);
+}
+.map-tip {
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: var(--shadow-2); font-weight: 650;
+  font-size: calc(11.5px * var(--step)); padding: 3px 7px;
+}
+.map-tip::before { display: none; }
+/* The two stop names that bracket the bus. Quieter than the bus's own label — they are context,
+   not the subject — and non-interactive so they never eat a tap meant for the map. */
+.map-tip.stop-tip {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--ink-2); font-weight: 600;
+  font-size: calc(10.5px * var(--step));
+  padding: 2px 7px; box-shadow: none;
+  border: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.bus-popup .leaflet-popup-content-wrapper {
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: var(--shadow-3); padding: 0;
+}
+.bus-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+.bus-popup .leaflet-popup-tip { background: var(--surface); border: 1px solid var(--line); }
+.bus-pop { padding: var(--space-3); min-width: 170px; }
+.bus-pop .bp-plate { font-weight: 750; font-size: calc(15px * var(--step)); letter-spacing: .4px; }
+.bus-pop .bp-meta { font-size: calc(12.5px * var(--step)); color: var(--ink-2); margin-top: 3px; }
+.bus-pop .bp-btn { margin-top: var(--space-2); }
+
+/* ---------------------------------------------------------------- live status */
+.status-head {
+  display: flex; align-items: center; gap: 12px; padding: var(--space-3);
+  border-bottom: 1px solid var(--line-2);
+}
+.status-head .plate {
+  font-weight: 750; font-size: calc(17px * var(--step)); letter-spacing: .5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.status-head .when { font-size: calc(11.5px * var(--step)); color: var(--ink-3); margin-top: 1px; }
+
+.kv { display: flex; gap: 12px; justify-content: space-between; padding: 12px var(--space-3);
+  border-bottom: 1px solid var(--line-2); font-size: calc(14px * var(--step)); }
+.kv:last-child { border-bottom: 0; }
+.kv .k { color: var(--ink-2); flex: none; }
+.kv .v { font-weight: 620; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.kv .v.num { white-space: nowrap; overflow-wrap: normal; }
+/* A row that is also a button: strip the UA border so the divider stays a hairline. */
+.kv-btn {
+  width: 100%; background: none; border: 0; border-top: 1px solid var(--line-2);
+  text-align: left; align-items: center;
+}
+.kv-btn:hover { background: var(--surface-2); }
+.kv-btn:active { background: var(--surface-3); }
+
+.metrics {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line-2);
+}
+.metric {
+  padding: 12px 8px; text-align: center; border-right: 1px solid var(--line-2);
+  display: flex; flex-direction: column; justify-content: center; min-height: 74px;
+}
+.metric:last-child { border-right: 0; }
+.metric .m-v {
+  font-weight: 750; font-size: calc(17px * var(--step)); letter-spacing: -.3px;
+  line-height: 1.2; overflow-wrap: anywhere;
+  /* A station name like "Kalupur Railway Station (Ahmedabad)" would otherwise stretch this
+     cell to four lines and shove the whole card down the screen. */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.metric .m-v.sm { font-size: calc(13.5px * var(--step)); font-weight: 700; -webkit-line-clamp: 3; }
+.metric .m-v.muted { color: var(--ink-3); font-weight: 600; font-size: calc(13px * var(--step)); }
+.metric .m-v.live { color: var(--live); }
+.metric .m-v.warn { color: var(--warn); }
+.metric .m-v .unit { font-size: .62em; font-weight: 600; color: var(--ink-3); }
+.metric .m-k {
+  font-size: calc(10.5px * var(--step)); color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .5px; font-weight: 600; margin-top: 3px;
+}
+.metric .m-s {
+  font-size: calc(11px * var(--step)); color: var(--ink-3); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.actions { display: flex; gap: 8px; padding: var(--space-3); flex-wrap: wrap; }
+.actions .btn { flex: 1 1 46%; min-width: 130px; }
+
+/* Padding helpers so screens stop carrying inline styles for the same three cases. */
+.pad-3 { padding: var(--space-3); }
+/* A note tucked between two bordered rows of the track card. It used to zero its top padding
+   entirely, which left it flush against the metrics row above with the two touching — the row
+   has a border and no bottom padding of its own, so there was nothing else to separate them. */
+.pad-tight { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+/* A chip row inside a card or sheet should respect that container, not bleed past it. */
+.chips.no-bleed { margin-inline: 0; padding-inline: 0; }
+
+/* A quiet way in to a rare action, without spending a whole row on it. */
+.pnr-toggle {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  min-height: var(--tap); padding: 0 var(--space-2);
+  background: none; border: 0; color: var(--ink-2);
+  font-size: calc(13.5px * var(--step)); font-weight: 600; text-align: left;
+}
+.pnr-toggle:hover { color: var(--ink); }
+.pnr-toggle .chev { margin-left: auto; transition: transform .2s; }
+.pnr-toggle.open .chev { transform: rotate(180deg); }
+.pnr-toggle.open { color: var(--brand); }
+
+/* ---------------------------------------------------------------- walkthrough */
+#tour { position: fixed; inset: 0; z-index: calc(var(--z-toast) + 10); }
+.tour-scrim { position: absolute; inset: 0; background: rgba(6, 10, 18, .62); }
+/* With a target highlighted, the ring's shadow does the dimming — two overlapping scrims
+   would double the darkness. */
+#tour:has(.tour-ring:not([hidden])) .tour-scrim { background: transparent; }
+/* The spotlight is a ring plus an enormous shadow, which dims everything except the target
+   without needing to clip or clone the element being explained. */
+.tour-ring {
+  position: fixed; border-radius: var(--r);
+  box-shadow: 0 0 0 9999px rgba(6, 10, 18, .62), 0 0 0 3px var(--brand);
+  transition: top .3s, left .3s, width .3s, height .3s;
+  pointer-events: none;
+}
+.tour-card {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(74px + env(safe-area-inset-bottom));
+  width: min(var(--maxw), calc(100vw - var(--gut) * 2));
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+  padding: var(--space-3);
+}
+.tour-card.at-top { bottom: auto; top: calc(env(safe-area-inset-top) + 70px); }
+.tour-card h2 { margin: 0 0 6px; font-size: calc(17px * var(--step)); letter-spacing: -.2px; }
+.tour-card p { margin: 0; color: var(--ink-2); font-size: calc(14px * var(--step)); line-height: 1.5; }
+.tour-progress { display: flex; gap: 5px; margin-bottom: var(--space-2); }
+.tour-progress span {
+  height: 3px; flex: 1; border-radius: 2px; background: var(--surface-3);
+  transition: background .25s;
+}
+.tour-progress span.on { background: var(--brand); }
+.tour-actions { display: flex; align-items: center; gap: 8px; margin-top: var(--space-3); }
+/* The tour owns interaction while it is up; the app underneath must not be tappable. */
+body.tour-open { overflow: hidden; }
+
+/* ---------------------------------------------------------------- permission primer */
+.perm-sheet { padding: var(--space-3); }
+/* `.sheet-body` deliberately carries no padding — a map or a full-bleed list has to reach the
+   edges. Anything text-shaped opts in to gutters instead of running into the screen edge. */
+.sheet-pad { padding: var(--space-3); }
+.perm-intro {
+  margin: 0 0 var(--space-3); color: var(--ink-2);
+  font-size: calc(13.5px * var(--step)); line-height: 1.5;
+}
+.perm-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: var(--space-3); margin-bottom: var(--space-2);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.perm-card.on { border-color: color-mix(in srgb, var(--live) 40%, var(--line)); }
+.perm-glyph {
+  width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-soft-ink);
+}
+.perm-card.on .perm-glyph { background: var(--live-soft); color: var(--live); }
+.perm-body { flex: 1; min-width: 0; }
+.perm-title { display: block; font-weight: 650; font-size: calc(15px * var(--step)); }
+.perm-why {
+  display: block; color: var(--ink-2); font-size: calc(13px * var(--step));
+  line-height: 1.45; margin-top: 3px;
+}
+.perm-body .btn { margin-top: var(--space-2); }
+.perm-ok {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-2);
+  color: var(--live); font-weight: 650; font-size: calc(13.5px * var(--step));
+}
+.perm-muted { display: block; margin-top: var(--space-2); color: var(--ink-3); font-size: calc(13px * var(--step)); }
+/* Recovery instructions: the only useful thing to show once a permission is blocked. */
+.perm-fix { margin-top: var(--space-2); line-height: 1.5; }
+
+/* ---------------------------------------------------------------- depot directory */
+.depot-row {
+  padding: var(--space-3); border-bottom: 1px solid var(--line-2);
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+.depot-row:last-child { border-bottom: 0; }
+.depot-head { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.depot-name { min-width: 0; flex: 1; }
+.depot-title {
+  display: block; font-weight: 650; font-size: calc(14.5px * var(--step));
+  line-height: 1.3; overflow-wrap: anywhere;
+}
+.depot-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+  font-size: calc(12.5px * var(--step)); color: var(--ink-3);
+}
+.depot-pin { color: var(--ink-3); }
+/* Numbers sit under the name, never beside it — two long ones used to crush it to nothing. */
+.depot-calls { display: flex; gap: 8px; flex-wrap: wrap; padding-left: 48px; }
+.depot-call {
+  text-decoration: none; white-space: nowrap; font-weight: 600;
+  min-height: 34px; padding: 0 12px; gap: 6px;
+  font-size: calc(12.5px * var(--step));
+}
+.depot-call.primary { margin-left: auto; }
+@media (max-width: 400px) {
+  .depot-calls { padding-left: 0; }
+}
+
+/* A distance badge sits beside a depot name; keep the icon and figure on one line. */
+.badge-distance { gap: 5px; white-space: nowrap; font-weight: 700; }
+.badge-distance svg { width: 13px; height: 13px; }
+
+/* ---------------------------------------------------------------- crowd reports */
+.crowd { padding: 0 var(--space-3) var(--space-3); border-top: 1px solid var(--line-2); }
+.crowd-head {
+  font-size: calc(11.5px * var(--step)); font-weight: 700; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--ink-3);
+  margin: var(--space-3) 0 var(--space-2);
+}
+.crowd .chips { padding-bottom: 0; }
+.crowd-said {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: var(--space-2);
+  font-size: calc(12.5px * var(--step)); color: var(--ink-2);
+}
+
+/* Occupancy slider.
+   One signed axis: seats going spare to the left, people standing to the right, zero in the
+   middle. One quantity, one control — a bus does not have spare seats and standing passengers
+   at once, so making the rider pick which question to answer first would be inventing a step.
+
+   The number leads, not the track. The whole reason this replaced a five-rung scale is that a
+   rung can never say "twelve standing", so the count is the headline and the slider is how you
+   set it. A bare grey bar said none of that. */
+.occ { position: relative; margin-top: 2px; }
+
+.occ-read { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.occ-value {
+  font-size: calc(21px * var(--step)); font-weight: 700; letter-spacing: -.3px;
+  color: var(--brand-soft-ink); font-variant-numeric: tabular-nums;
+}
+.occ.standing .occ-value { color: var(--danger); }
+.occ.unset .occ-value {
+  font-size: calc(14px * var(--step)); font-weight: 500; color: var(--ink-3); letter-spacing: 0;
+}
+.occ-count { margin-left: auto; font-size: calc(11.5px * var(--step)); color: var(--ink-3); }
+
+/* The bar owns both the track and the input, and is exactly the track's height. The slider was
+   previously centred with `top: 50%` against the whole `.occ` block — which includes the
+   headline number above it — so the thumb floated well above the line it is supposed to ride. */
+.occ-bar { position: relative; height: 12px; }
+/* Inset by half the thumb so positions inside the track line up with the thumb itself. A range
+   thumb's centre travels from thumbWidth/2 to width - thumbWidth/2, never 0% to 100%, so a zero
+   marker placed at a raw percentage of the full width sits beside the thumb rather than under
+   it — which is how "full" ended up left of the dot. The input keeps the full width; the track
+   is inset to match where the thumb can actually go. */
+.occ-track {
+  position: absolute; left: 13px; right: 13px; top: 0;
+  height: 12px; border-radius: 6px; overflow: hidden;
+  background: var(--surface-2);
+}
+/* The two directions are tinted before anyone touches anything, so which way means what is
+   readable from the track alone rather than only from the labels beneath it. */
+.occ-half { position: absolute; top: 0; bottom: 0; }
+.occ-half.left { left: 0; width: calc(40 / 70 * 100%); background: var(--brand-soft); }
+.occ-half.right { right: 0; width: calc(30 / 70 * 100%); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.occ-fill {
+  position: absolute; top: 0; bottom: 0; background: var(--brand);
+  transition: left .12s ease, width .12s ease, background .18s ease;
+}
+.occ.standing .occ-fill { background: var(--danger); }
+.occ.unset .occ-fill { width: 0 !important; }
+/* The moment the last seat goes. Everything right of it is someone on their feet. */
+.occ-zero {
+  position: absolute; top: 0; bottom: 0; left: calc(40 / 70 * 100%);
+  width: 2px; margin-left: -1px; background: var(--surface); opacity: .9;
+}
+
+.occ-range {
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 100%; height: 44px; margin: 0;
+  -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+.occ-range:focus-visible { outline: 2px solid var(--brand); outline-offset: 6px; border-radius: 8px; }
+.occ-range::-webkit-slider-runnable-track { height: 44px; background: transparent; }
+.occ-range::-moz-range-track { height: 44px; background: transparent; }
+/* Centred by half the thumb's height. A percentage margin here would resolve against the
+   element's *width*, which is how an earlier thumb ended up off-screen entirely. */
+.occ-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface); border: 4px solid var(--brand);
+  box-shadow: var(--shadow-2); cursor: grab; margin-top: 9px;
+}
+.occ-range::-moz-range-thumb {
+  width: 26px; height: 26px; border-radius: 50%; box-sizing: border-box;
+  background: var(--surface); border: 4px solid var(--brand);
+  box-shadow: var(--shadow-2); cursor: grab;
+}
+.occ.standing .occ-range::-webkit-slider-thumb { border-color: var(--danger); }
+.occ.standing .occ-range::-moz-range-thumb { border-color: var(--danger); }
+.occ-range:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.08); }
+
+.occ-ends {
+  display: flex; justify-content: space-between; margin-top: 10px;
+  font-size: calc(10.5px * var(--step)); color: var(--ink-3);
+  margin-left: 13px; margin-right: 13px;   /* same inset, so "full" sits under the zero mark */
+}
+/* Aligned to the real zero (40 of the 70 units), not to the middle of the row — the scale is
+   asymmetric, so a label centred by geometry points at the wrong place on the track. */
+.occ-mid { position: absolute; left: calc(40 / 70 * 100%); transform: translateX(-50%); }
+.occ-ends { position: relative; }
+
+/* Undo. Shown with its countdown running rather than vanishing on a hidden schedule — an
+   option that disappears by itself reads as a glitch, one that visibly runs out reads as a rule. */
+.undo-report {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: var(--space-2);
+  background: none; border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 12px; cursor: pointer;
+  color: var(--ink-2); font-weight: 650; font-size: calc(12px * var(--step));
+}
+.undo-report:active { transform: scale(.97); }
+
+.crowd-head.sub { margin-top: var(--space-3); }
+.crowd-note { margin-top: var(--space-2); }
+.cn-body { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.cn-lead { font-size: calc(12.5px * var(--step)); }
+.cn-plate {
+  font-weight: 800; font-size: calc(16px * var(--step)); letter-spacing: .3px;
+  line-height: 1.15;
+}
+.cn-body .btn { margin-top: 4px; }
+.cn-count { font-size: calc(11.5px * var(--step)); opacity: .8; }
+/* Deliberately quiet. Clearing someone else's report is a correction, not a primary action —
+   it should be findable by anyone who knows it is wrong, and invisible to everyone else. */
+.cn-clear {
+  margin-top: 6px; padding: 0; border: 0; background: none;
+  color: inherit; opacity: .72; cursor: pointer;
+  font-size: calc(11.5px * var(--step)); font-weight: 600; text-decoration: underline;
+  text-align: left;
+}
+.cn-clear:active { opacity: 1; }
+/* The stand-in notice leads the card, so it is read before the bus's own details. */
+.crowd-note.stand-in { margin-top: 0; margin-bottom: var(--space-3); }
+
+/* ---------------------------------------------------------------- autocomplete */
+.ac {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: var(--z-dropdown);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: var(--shadow-3); max-height: 290px; overflow: auto; padding: 4px;
+}
+.ac:empty { display: none; }
+/* Inside a sheet sized to its own content there is nothing below the field for an overlay to
+   hang into, so an absolutely-positioned list is clipped by the sheet's scroll box and the
+   matches are simply unreachable. In here the results join the layout instead, and the sheet
+   grows to hold them until it hits its max-height and scrolls. */
+.sheet.compact .ac {
+  position: static; margin-top: 6px;
+  box-shadow: none; max-height: 232px;
+}
+.ac-item {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 10px; border: 0; background: transparent; border-radius: var(--r-sm);
+  min-height: var(--tap);
+}
+.ac-item .glyph {
+  width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--ink-2);
+}
+.ac-item .t1 { font-weight: 620; font-size: calc(14px * var(--step)); }
+.ac-item .t2 { font-size: calc(12px * var(--step)); color: var(--ink-3); }
+.ac-item:hover, .ac-item[aria-selected="true"] { background: var(--brand-soft); }
+
+/* ---------------------------------------------------------------- swap control */
+.od { position: relative; }
+.od .swap {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; border-radius: 50%; z-index: var(--z-swap);
+  border: 1px solid var(--line); background: var(--surface); color: var(--brand);
+  display: grid; place-items: center; box-shadow: var(--shadow-1);
+}
+.od .swap:active { transform: translateY(-50%) rotate(180deg); }
+/* The swap sits in the gap between the two fields, which is exactly where an open dropdown
+   starts — leaving a sliver of it poking out above the list. It is unreachable while a list
+   is open, so take it out of the way. */
+.od:has(.field.open) .swap { opacity: 0; pointer-events: none; }
+
+/* ---------------------------------------------------------------- timeline */
+.timeline { padding: 4px 0; }
+.stop { display: flex; gap: 12px; padding: 0 14px; }
+.stop .rail { position: relative; width: 18px; flex: none; }
+.stop .rail::before {
+  content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--line);
+}
+.stop:first-child .rail::before { top: 16px; }
+.stop:last-child .rail::before { bottom: calc(100% - 16px); }
+.stop .node {
+  position: absolute; left: 3px; top: 11px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--line); z-index: 1; /* local: over the rail */
+}
+.stop.done .node { background: var(--ink-3); border-color: var(--ink-3); }
+.stop.done .rail::before { background: var(--ink-3); }
+.stop.here .node {
+  background: var(--live-dot); border-color: var(--live-dot); width: 14px; height: 14px; left: 2px;
+  box-shadow: 0 0 0 4px var(--live-soft);
+}
+.stop .info { flex: 1; min-width: 0; padding: 8px 0 12px; display: flex; gap: 10px; align-items: baseline; }
+.stop .nm { font-weight: 620; font-size: calc(14px * var(--step)); flex: 1; min-width: 0; }
+.stop .nm .gu { display: block; font-weight: 500; font-size: calc(12px * var(--step)); color: var(--ink-3); }
+.stop .tm { font-size: calc(12.5px * var(--step)); color: var(--ink-2); font-weight: 620; flex: none;
+  text-align: right; }
+/* What we have observed, as against what the timetable claims. */
+.stop .tm-typical {
+  display: block; font-size: calc(10.5px * var(--step)); font-weight: 500;
+  color: var(--ink-3); margin-top: 1px; white-space: nowrap;
+}
+.stop.done .nm { color: var(--ink-3); font-weight: 550; }
+.stop.mine .node { border-color: var(--accent-bg); background: var(--accent-bg); box-shadow: 0 0 0 4px var(--accent-soft); }
+.stop.mine .nm { color: var(--accent); font-weight: 700; }
+.stop .mine-tag {
+  display: inline-flex; align-items: center; gap: 4px; margin-left: 6px;
+  font-size: calc(10.5px * var(--step)); font-weight: 700; color: var(--accent);
+  background: var(--accent-soft); padding: 2px 7px; border-radius: var(--r-pill);
+}
+.stop:hover .info { background: var(--surface-2); border-radius: var(--r-sm); }
+
+/* Service status.
+   Quiet when healthy on purpose — an indicator that shouts while everything is fine is one
+   people stop reading, and then it cannot tell them anything on the day it matters. */
+.status-dot {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 11px 5px 9px;
+  background: none; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--ink-3); font-size: calc(12px * var(--step)); font-weight: 600;
+  cursor: pointer;
+}
+.status-dot .sd-light {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--live-dot); flex: none;
+}
+.status-dot.degraded { color: var(--warn, #a8641c); border-color: color-mix(in srgb, var(--warn, #a8641c) 40%, transparent); }
+.status-dot.degraded .sd-light { background: var(--warn, #a8641c); }
+.status-dot.down { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+/* Only a real outage animates. Motion is the loudest thing on a screen and it is spent here on
+   the one state a rider must not miss. */
+.status-dot.down .sd-light { background: var(--danger); animation: pulse 1.6s ease-out infinite; }
+.status-dot.unknown .sd-light { background: var(--surface-3); }
+
+/* One row per service, in the shape Uptime Kuma settled on: a percentage badge, the name, and
+   the run of recent checks. The badge answers "is it reliable", the heartbeat answers "is it
+   failing right now" — and those need opposite reactions from someone deciding whether to keep
+   waiting at the stop, which is why a single average is not enough. */
+.svc-list { display: flex; flex-direction: column; }
+.svc {
+  display: flex; align-items: center; gap: 10px;
+  padding: var(--space-2) 0 4px; border-top: 1px solid var(--line-2);
+}
+.svc:first-child { border-top: 0; }
+.svc-pct {
+  flex: none; min-width: 48px; text-align: center;
+  padding: 3px 7px; border-radius: 6px;
+  font-size: calc(11.5px * var(--step)); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--live-dot) 16%, transparent); color: var(--live-dot-ink, #12704a);
+}
+.svc-pct.degraded { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.svc-pct.down { background: color-mix(in srgb, var(--danger) 16%, transparent); color: var(--danger); }
+.svc-pct.unknown, .svc-pct.idle { background: var(--surface-2); color: var(--ink-3); }
+.svc-name {
+  flex: 1; min-width: 0; font-weight: 650; font-size: calc(13.5px * var(--step));
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.beats { display: flex; gap: 2px; align-items: center; flex: none; }
+.beats i {
+  width: 4px; height: 16px; border-radius: 2px; background: var(--live-dot);
+}
+.beats i.down { background: var(--danger); }
+.beats i.idle { background: var(--surface-3); }
+.svc-meta {
+  padding-bottom: var(--space-2); padding-left: 58px;
+  font-size: calc(11px * var(--step)); color: var(--ink-3);
+}
+
+/* A one-line empty state. Home has two empty sections at once on a first run, and the
+   full-height version stacked twice pushed everything real below the fold. */
+.mini-empty {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3); flex-wrap: wrap;
+}
+.me-glyph {
+  width: 38px; height: 38px; border-radius: 11px; flex: none;
+  display: grid; place-items: center;
+  background: var(--surface-2); color: var(--ink-3);
+}
+.me-body { flex: 1; min-width: 120px; display: flex; flex-direction: column; gap: 2px; }
+.me-title { font-weight: 650; font-size: calc(14px * var(--step)); }
+.me-text { font-size: calc(12.5px * var(--step)); color: var(--ink-3); line-height: 1.4; }
+
+/* The status pill sits between the search box and the first section, and needs to belong to
+   neither — without its own space it reads as an attachment to the input above it. */
+.status-dot { margin: var(--space-3) 0 var(--space-1); }
+
+/* The buses this phone keeps returning to. Weightier than a recent chip, because it is an
+   answer rather than a history entry. */
+.chip.strong { border-color: color-mix(in srgb, var(--brand) 30%, transparent); font-weight: 700; }
+.chip.strong .chip-n {
+  margin-left: 2px; padding: 1px 6px; border-radius: 999px;
+  background: var(--brand-soft); color: var(--brand-soft-ink);
+  font-size: calc(10.5px * var(--step)); font-weight: 700;
+}
+
+/* A recent chip with its own dismiss. Removing one entry is the useful control; hiding the
+   whole row also loses the entries the rider did want. */
+.chip.removable { display: inline-flex; align-items: stretch; padding: 0; overflow: hidden; }
+.chip.removable .chip-main {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 6px 9px 13px; border: 0; background: none; color: inherit; font: inherit;
+  cursor: pointer;
+}
+.chip.removable .chip-x {
+  display: grid; place-items: center; padding: 0 10px 0 4px;
+  border: 0; background: none; color: var(--ink-3); cursor: pointer;
+  /* A thumb needs the full target here, because the other half of this chip starts tracking a
+     bus: at 30px the two actions were close enough that a miss forgot the bus instead. */
+  min-width: var(--tap);
+}
+.chip.removable .chip-x:active { color: var(--danger); }
+
+/* A bus stand. Deliberately small and quiet — there are hundreds of these on a corridor and
+   they are context for the bus, not the subject of the screen. Ringed rather than filled so it
+   stays legible on both the pale Voyager tiles and dark satellite imagery. */
+.stand-pin {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--surface);
+  border: 2.5px solid var(--ink-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+}
+
+/* The stand the bus has drawn level with. Brand-coloured and ringed so it reads as "here",
+   and larger so it is findable at a glance among the quiet ones around it. */
+.stand-pin.near {
+  width: 14px; height: 14px;
+  background: var(--brand);
+  border-color: var(--surface);
+  box-shadow: 0 0 0 2px var(--brand-soft), 0 1px 4px rgba(0, 0, 0, .4);
+}
+
+/* Its label. Quieter and tighter than the bus's own — a stand name is there to orient you, so
+   it must not compete with the thing you are actually following. */
+.map-tip.stand-tip {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: calc(10px * var(--step));
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: none;
+  border: 1px solid var(--line);
+}
+/* Named out loud while the bus is there — it stops being background at that moment. */
+.map-tip.stand-tip.near {
+  background: var(--brand-soft);
+  color: var(--brand-soft-ink);
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* What riders said, on the departure list. Deliberately quiet — it sits on the meta line among
+   service type and duration, and shouting would make every row look like a warning. */
+.crowd-chip {
+  display: inline-flex; align-items: center;
+  padding: 1px 7px; border-radius: 999px;
+  font-size: calc(10.5px * var(--step)); font-weight: 650;
+  background: var(--surface-2); color: var(--ink-2);
+  /* Its own separator — a "·" after a pill just dangles at the end of a line when this wraps. */
+  margin-right: 5px;
+}
+.crowd-chip.lvl-1, .crowd-chip.lvl-2 { background: var(--live-soft); color: var(--live); }
+.crowd-chip.lvl-3 { background: var(--warn-soft); color: var(--warn); }
+.crowd-chip.lvl-4, .crowd-chip.lvl-5 { background: var(--danger-soft); color: var(--danger); }
+.crowd-chip.gone { background: var(--danger-soft); color: var(--danger); }
+
+/* Occupancy at rest: what riders said, and a button to say something. The slider only appears
+   on a deliberate tap — permanently on screen it was being dragged while scrolling past. */
+.occ-closed {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 2px;
+}
+.occ-summary { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
+/* What this service is usually like at this hour. Sits above the live figure because it is the
+   one that survives nobody having reported this particular bus yet. */
+.occ-usually {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  margin-bottom: var(--space-2);
+  font-size: calc(12.5px * var(--step)); color: var(--ink-2);
+}
+.occ-closed .occ-value { font-size: calc(15px * var(--step)); font-weight: 700; color: var(--brand-soft-ink); }
+.occ-closed .occ-value.standing { color: var(--danger); }
+.occ-closed .occ-count { margin-left: 0; }
+.occ-cancel {
+  display: block; margin: var(--space-2) auto 0; padding: 4px 12px;
+  background: none; border: 0; color: var(--ink-3); cursor: pointer;
+  font-size: calc(12px * var(--step)); font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- sheet */
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: var(--z-sheet); background: rgba(8, 14, 27, .5);
+  backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.sheet-backdrop.on { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-sheet) + 1);
+  height: min(640px, 86vh); max-height: 92vh; display: flex; flex-direction: column;
+  background: var(--surface); border-top: 1px solid var(--line);
+  border-radius: 22px 22px 0 0; box-shadow: var(--shadow-3);
+  transform: translateY(102%); visibility: hidden;
+  transition: transform .26s cubic-bezier(.32, .72, 0, 1), visibility .26s;
+}
+.sheet.on { transform: none; visibility: visible; }
+/* Sized to its content. `height` is dropped rather than overridden to auto so the max-height
+   cap still applies and a compact sheet that grows unexpectedly still scrolls. */
+.sheet.compact { height: auto; max-height: 86vh; }
+@media (min-width: 700px) {
+  .sheet.compact { height: auto; }
+  .sheet { left: 50%; right: auto; width: min(680px, 94vw); height: min(620px, 84vh);
+    transform: translate(-50%, calc(100% + 32px));
+    border-radius: 22px; bottom: 20px; border: 1px solid var(--line); }
+  .sheet.on { transform: translate(-50%, 0); }
+}
+.sheet-head {
+  display: flex; align-items: center; gap: 12px; padding: var(--space-3) var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--line-2); flex: none;
+}
+.sheet-head .h { font-weight: 700; font-size: calc(15.5px * var(--step)); min-width: 0; }
+.sheet-head .h .s { display: block; font-weight: 500; font-size: calc(12px * var(--step)); color: var(--ink-3); }
+.sheet-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
+.grabber { width: 38px; height: 4px; border-radius: 2px; background: var(--surface-3); margin: 8px auto 0; }
+
+/* ---------------------------------------------------------------- nav */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-tabbar); display: flex;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar button {
+  flex: 1; min-height: 54px; border: 0; background: none; color: var(--ink-3);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: calc(10.5px * var(--step)); font-weight: 620; padding: 6px 0 8px;
+  transition: color .15s;
+}
+.tabbar button.on { color: var(--brand); }
+.tabbar button .cap { letter-spacing: .1px; }
+
+/* ---------------------------------------------------------------- feedback */
+.empty { text-align: center; padding: 30px var(--gut); }
+.empty .glyph {
+  width: 52px; height: 52px; border-radius: 16px; margin: 0 auto 12px;
+  display: grid; place-items: center; background: var(--surface-2); color: var(--ink-3);
+}
+.empty .t1 { font-weight: 650; font-size: calc(15px * var(--step)); }
+.empty .t2 { color: var(--ink-3); font-size: calc(13.5px * var(--step)); margin-top: 5px;
+  max-width: 42ch; margin-inline: auto; }
+.empty .btn { margin-top: 14px; }
+
+.note {
+  display: flex; gap: 10px; padding: 12px var(--space-3); border-radius: var(--r);
+  background: var(--surface-2); color: var(--ink-2); font-size: calc(13px * var(--step));
+  border: 1px solid var(--line-2);
+}
+.note.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.note.danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+.note svg { flex: none; margin-top: 1px; }
+
+.skel { border-radius: var(--r-lg); background: var(--surface-2); position: relative; overflow: hidden; }
+.skel::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 70%, transparent), transparent);
+  animation: shimmer 1.2s infinite;
+}
+/* The refresh icon asks for this while a request is in flight; without it the icon simply sat
+   still and the app looked frozen at the moment it was working hardest. */
+.spin { animation: spin 900ms linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.skel-stack { display: grid; gap: var(--space-2); }
+/* Matched to a real departure row, so the layout does not jump when the data lands — a
+   placeholder taller than the thing it stands in for is its own small lie. */
+.skel.tile-skel { height: 52px; border-radius: var(--r); }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(74px + env(safe-area-inset-bottom)); z-index: var(--z-toast);
+  transform: translate(-50%, 14px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--ink); color: var(--bg);
+  padding: 10px 16px; border-radius: var(--r-pill);
+  font-size: calc(13.5px * var(--step)); font-weight: 620;
+  box-shadow: var(--shadow-3); transition: .22s ease;
+  max-width: min(92vw, 460px);
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------------------------------------------------------------- install banner */
+.install-banner {
+  position: fixed; left: 0; right: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  /* Below the sheet on purpose. At --z-toast this painted over the permission primer and
+     covered its Allow button, so the rider could not finish the question they were being
+     asked. An install suggestion never outranks something waiting on an answer. */
+  z-index: var(--z-install);
+  padding: 0 var(--gut) var(--space-2);
+  transform: translateY(16px); opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+}
+.install-banner.on { opacity: 1; transform: none; pointer-events: auto; }
+.install-card {
+  max-width: var(--maxw); margin: 0 auto;
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+  padding: var(--space-3);
+}
+.install-card .ib-icon {
+  width: 38px; height: 38px; border-radius: 11px; flex: none; display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-soft-ink);
+}
+.install-card .ib-body { flex: 1; min-width: 0; }
+.install-card .ib-title { display: block; font-weight: 700; font-size: calc(14.5px * var(--step)); }
+.install-card .ib-sub {
+  display: block; font-size: calc(12.5px * var(--step)); color: var(--ink-2); margin-top: 2px;
+}
+.install-card .ib-steps {
+  display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  margin-top: var(--space-2); font-size: calc(13px * var(--step)); font-weight: 600; color: var(--ink);
+}
+.install-card .ib-steps svg { color: var(--brand); }
+.install-card .btn { margin-top: var(--space-2); }
+.install-card .ib-close {
+  flex: none; width: 34px; height: 34px; margin: -4px -6px 0 0; position: relative;
+}
+/* Stays 34px to sit properly in the banner's corner, but takes taps across the full 44. It is
+   the only control in that corner, so the overflow cannot steal one from anything else — and a
+   stray dismiss costs the rider the install prompt for the next three weeks. */
+.install-card .ib-close::after { content: ''; position: absolute; inset: -5px; }
+
+.offline-bar {
+  position: fixed; left: 0; right: 0; top: 0; z-index: var(--z-offline);
+  background: var(--warn-soft); color: var(--warn);
+  text-align: center; padding: calc(env(safe-area-inset-top) + 6px) 12px 6px;
+  font-size: calc(12.5px * var(--step)); font-weight: 650;
+  transform: translateY(-100%); transition: transform .2s;
+}
+.offline-bar.on { transform: none; }
+
+/* ---------------------------------------------------------------- settings */
+/* Support card.
+   Featured, but it must not shout: it sits below everything the app actually does, uses the
+   brand tint rather than a solid brand fill, and states plainly that nothing is locked behind
+   it. A donation ask that looks like an advert would undermine the ad-free claim above it. */
+.support-card {
+  display: flex; gap: var(--space-2); align-items: flex-start;
+  padding: var(--space-3);
+  background: var(--brand-soft);
+  /* Plain border first: a browser without color-mix drops the whole declaration, and a card
+     with no edge at all reads as broken rather than as understated. */
+  border: 1px solid var(--line);
+  border-color: color-mix(in srgb, var(--brand) 18%, transparent);
+  border-radius: var(--r-lg);
+  color: inherit; text-decoration: none;
+  transition: transform .15s, box-shadow .15s;
+}
+.support-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-3); }
+.support-card:active { transform: none; }
+.sc-glyph {
+  flex: none; width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--brand); color: var(--brand-ink);
+}
+.sc-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sc-title { font-weight: 700; font-size: calc(15px * var(--step)); color: var(--brand-soft-ink); }
+.sc-text { color: var(--ink-2); font-size: calc(13px * var(--step)); line-height: 1.5; }
+.sc-cta {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  margin-top: 2px; padding: 9px 14px; border-radius: var(--r-sm);
+  background: var(--brand); color: var(--brand-ink);
+  font-weight: 650; font-size: calc(13.5px * var(--step));
+}
+.sc-note { color: var(--ink-3); font-size: calc(11.5px * var(--step)); }
+
+.app-version {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center; color: var(--ink-3);
+  font-size: calc(12px * var(--step)); padding: var(--space-2) 0;
+}
+/* A byline, not a call to action: it stays at footer weight and only picks up the brand colour
+   on the name itself, so it reads as authorship rather than as another thing to tap. */
+.av-by a {
+  color: var(--ink-2); text-decoration: none; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.av-by a:hover { color: var(--brand-2); text-decoration: underline; }
+.av-by svg { opacity: .7; }
+.list-row.top { align-items: flex-start; }
+/* A settings row whose control is too wide to sit beside its label drops the control onto its
+   own full-width line instead of crushing the label. Four map styles do not fit next to
+   "Map style" on a 375px phone; three did, which is exactly the kind of thing that breaks
+   silently when an option is added. Wrapping is driven by the control's own min-content width,
+   so wider screens keep the single-line layout. */
+.list-row.wraps { flex-wrap: wrap; }
+/* A width, not `flex: 1 1 auto` — an auto-basis control shrinks below its content and overflows
+   the row rather than wrapping, which is the failure this rule exists to prevent. */
+@media (max-width: 520px) {
+  .list-row.wraps .seg { flex: 1 0 100%; margin-top: var(--space-2); }
+  .list-row.wraps .seg button { flex: 1; text-align: center; }
+}
+.row-glyph { color: var(--ink-3); display: grid; place-items: center; flex: none; }
+.row-glyph.danger, .lbl.danger { color: var(--danger); }
+.trip-title { margin-left: var(--space-3) !important; margin-top: var(--space-3) !important; }
+.trip-note { margin: 0 var(--space-3) var(--space-2); }
+.trip-tail { height: var(--space-3); }
+.list { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line);
+  background: var(--surface); box-shadow: var(--shadow-1); }
+.list-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px var(--space-3); background: transparent; border: 0;
+  border-bottom: 1px solid var(--line-2); min-height: var(--tap);
+  color: inherit; text-decoration: none; cursor: pointer;
+}
+.list-row:last-child { border-bottom: 0; }
+.list-row .lbl { flex: 1; min-width: 0; font-size: calc(14.5px * var(--step)); font-weight: 550; }
+.list-row .lbl .hint { display: block; font-size: calc(12px * var(--step)); color: var(--ink-3); font-weight: 400; }
+.list-row .val { color: var(--ink-3); font-size: calc(13.5px * var(--step)); }
+.seg { display: flex; gap: 4px; background: var(--surface-2); padding: 3px; border-radius: var(--r-sm); }
+.seg button {
+  border: 0; background: transparent; color: var(--ink-2); border-radius: 7px;
+  padding: 7px 11px; font-size: calc(13px * var(--step)); font-weight: 620;
+}
+.seg button.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1); }
+
+/* ---------------------------------------------------------------- motion
+   One shared vocabulary rather than per-component flourishes: things arrive by rising a few
+   pixels, things being touched give slightly under the finger, and nothing moves for longer
+   than it takes to read. Everything here collapses under the reduced-motion rule below, which
+   is why each effect is expressed as a transition or a named animation rather than as a
+   hand-driven timer. */
+
+/* Results arrive as a sequence rather than a slab.
+   Applied to `.tile` itself rather than to a wrapper class, so home, routes and nearby all get
+   it without three screens having to remember to opt in. The effect is opacity-only and short:
+   these lists re-render on their own refresh, and a list that visibly slid back into place
+   every sixty seconds would read as a redraw rather than as polish. Past eight rows the delay
+   stops climbing — later rows would be waiting on an animation instead of being read. */
+.tile {
+  animation: fade-in .22s ease both;
+  animation-delay: calc(var(--d, 8) * 26ms);
+}
+.tile:nth-child(1) { --d: 0; }
+.tile:nth-child(2) { --d: 1; }
+.tile:nth-child(3) { --d: 2; }
+.tile:nth-child(4) { --d: 3; }
+.tile:nth-child(5) { --d: 4; }
+.tile:nth-child(6) { --d: 5; }
+.tile:nth-child(7) { --d: 6; }
+.tile:nth-child(8) { --d: 7; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Press feedback. Buttons that give under the thumb feel answered; ones that do not feel
+   ignored on a slow connection, which is exactly when reassurance matters most. */
+.btn, .chip, .tile, .list-row, .iconbtn, .occ-cell, .ac-item, .seg button {
+  transition: transform .12s ease, background-color .18s ease,
+              border-color .18s ease, box-shadow .18s ease;
+}
+.btn:active, .chip:active, .iconbtn:active, .seg button:active { transform: scale(.965); }
+/* Full-width rows scale from their leading edge; scaling a wide row from its centre reads as
+   the whole card shifting rather than as a press. */
+.tile:active, .list-row:active, .ac-item:active { transform: scale(.99); transform-origin: left center; }
+
+/* The tracked numbers change on their own schedule, so a changed value announces itself
+   instead of silently swapping while the rider is looking elsewhere. */
+.metric-changed { animation: metric-pop .5s cubic-bezier(.2, .8, .2, 1); }
+@keyframes metric-pop {
+  0% { transform: translateY(-3px); opacity: .55; }
+  60% { transform: translateY(0); opacity: 1; }
+}
+
+/* Cards and sheets settle rather than snap. */
+.card { animation: rise .28s cubic-bezier(.2, .8, .2, 1) both; }
+.screen.on { animation: rise .24s cubic-bezier(.2, .8, .2, 1) both; }
+
+/* The bus pin on the map, so a live vehicle reads as alive even while it is stopped. */
+.bus-pin::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid var(--brand); opacity: .5;
+  animation: ping 2.4s cubic-bezier(0, 0, .2, 1) infinite;
+}
+@keyframes ping {
+  0% { transform: scale(.75); opacity: .5; }
+  70%, 100% { transform: scale(1.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  /* A decorative pulse has nothing to say once it cannot move; leaving it as a static ring
+     would just draw a permanent circle around the bus. */
+  .bus-pin::after { display: none; }
+  .btn:active, .chip:active, .tile:active, .list-row:active,
+  .iconbtn:active, .seg button:active, .ac-item:active { transform: none; }
+}
