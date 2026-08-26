@@ -213,9 +213,10 @@ test('a departure board ranks catchable buses above departed ones', () => {
 test('no emoji in any user-facing code', async () => {
   const { readdirSync, readFileSync } = await import('node:fs');
   const { join } = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
 
   const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
-  const web = new URL('../web/', import.meta.url).pathname;
+  const web = fileURLToPath(new URL('../web/', import.meta.url));
   const files = [
     ...readdirSync(join(web, 'js')).filter((f) => f.endsWith('.js')).map((f) => join('js', f)),
     ...readdirSync(web).filter((f) => /\.(html|css|js)$/.test(f)),
