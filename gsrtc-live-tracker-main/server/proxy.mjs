@@ -1,5 +1,5 @@
-/**
- * ST Tracker server — serves the PWA and proxies the GSRTC tracking API.
+﻿/**
+ * ST Tracker server â€” serves the PWA and proxies the GSRTC tracking API.
  *
  * The upstream credentials stay here so the browser never holds them, and this is also where
  * the app gets the things a public deployment needs: caching, rate limiting, timeouts,
@@ -44,7 +44,7 @@ const BIND = process.env.BIND || '0.0.0.0';
 /**
  * Per-IP request ceiling. Set high on purpose: this exists to stop a runaway script, not to
  * ration real people. Indian mobile networks put large numbers of subscribers behind carrier
- * grade NAT, so one public IP can be a whole neighbourhood — a limit tuned for a single user
+ * grade NAT, so one public IP can be a whole neighbourhood â€” a limit tuned for a single user
  * would lock out a rush-hour crowd sharing a Jio or Airtel exit. Cached responses cost this
  * server about 4ms and never reach the operator (see scripts/loadtest.mjs), so serving them
  * generously is cheap; the upstream is protected by the cache and the tracker's own budget,
@@ -68,7 +68,7 @@ function log(level, message, extra = {}) {
 /* ------------------------------------------------------------------ cache */
 class TtlCache {
   constructor(max = 400) { this.max = max; this.map = new Map(); }
-  /** Returns { value, fresh } — a caller may still want an expired entry. */
+  /** Returns { value, fresh } â€” a caller may still want an expired entry. */
   peek(key) {
     const hit = this.map.get(key);
     if (!hit) return undefined;
@@ -94,7 +94,7 @@ const pending = new Map();
  *
  * `staleMs` opts into stale-while-revalidate: past the TTL but within the stale window the
  * cached copy is returned straight away and a refresh runs in the background. That is the
- * right trade for a timetable — a rider gets a ninety-second-old departure list instantly
+ * right trade for a timetable â€” a rider gets a ninety-second-old departure list instantly
  * instead of waiting three seconds for the operator to answer, and the list barely changes
  * within a day anyway. Never use it for live positions, where stale is the whole problem.
  */
@@ -144,12 +144,12 @@ function rateLimited(ip) {
 /**
  * The rider's own address, for rate limiting.
  *
- * `X-Real-IP` first, because that is the one nginx *sets* — a single value it overwrites on every
+ * `X-Real-IP` first, because that is the one nginx *sets* â€” a single value it overwrites on every
  * request, so a client cannot choose it. `X-Forwarded-For` is a list anyone may prepend to, and
  * taking its first entry is how a header under the caller's control becomes their rate-limit
  * identity; it stays as a fallback only for a deployment that sets it and nothing else.
  *
- * Behind Cloudflare this is only meaningful once nginx runs the realip module — see
+ * Behind Cloudflare this is only meaningful once nginx runs the realip module â€” see
  * `scripts/nginx-realip.sh`. Without it every rider arrives as the same proxy address and shares
  * one token bucket, which at enough traffic is an outage for everybody at once.
  */
@@ -166,7 +166,7 @@ const clientIp = (req) => {
  *
  * The app sends a random id it generated and keeps locally. That is the only thing here that
  * actually distinguishes one rider from another: the IP does not, because behind the proxy every
- * request arrives from the same address — which meant the first person to report a bus blocked
+ * request arrives from the same address â€” which meant the first person to report a bus blocked
  * everyone else for an hour, and an undo could withdraw a stranger's report.
  *
  * It is forgeable, and that is acceptable: the per-hour rule is a guard against double-reporting,
@@ -289,7 +289,7 @@ async function fleet(date) {
 
 /* ------------------------------------------------------------------ API routes */
 const TTL = {
-  vehicle: 8000,        // live position — short, but enough to absorb a burst of clients
+  vehicle: 8000,        // live position â€” short, but enough to absorb a burst of clients
   trip: 15000,
   timetable: 90000,
   stations: 12 * 3600 * 1000,
@@ -303,7 +303,7 @@ const TTL = {
 // scenes. Only for data whose staleness a rider would never notice.
 const STALE = {
   // A bus position a minute old, served instantly, beats a fresh one after a thirty-second
-  // wait — especially since the client polls again shortly and the map already animates
+  // wait â€” especially since the client polls again shortly and the map already animates
   // between fixes. Without this every caller queued behind a slow upstream call.
   vehicle: 60 * 1000,
   trip: 2 * 60 * 1000,
@@ -320,7 +320,7 @@ const testCooldown = new Map();
  * What both health endpoints report.
  *
  * `/health` and `/api/health` served two hand-kept copies of this object, and a copy drifts the
- * moment one of them is edited — adding the harvester counters reached only one of the two.
+ * moment one of them is edited â€” adding the harvester counters reached only one of the two.
  */
 const healthBody = () => ({
   status: 'ok',
@@ -369,7 +369,7 @@ const routes = {
   },
 
   /**
-   * Every bus running between two stations, positioned — the data behind the route map.
+   * Every bus running between two stations, positioned â€” the data behind the route map.
    * Registers each one with the tracker, so the second call is served from memory and the
    * map animates properly instead of jumping.
    */
@@ -385,12 +385,12 @@ const routes = {
    *
    * Public on purpose: when the backend is down the app looks broken, and riders blame the app
    * rather than the system it depends on. Being able to say "GSRTC is not responding" is the
-   * difference between a bug report and an explanation. Short TTL — a status page that is a
+   * difference between a bug report and an explanation. Short TTL â€” a status page that is a
    * minute stale is worse than none, because it is confidently wrong.
    */
   'GET /api/status': async () => {
     // Kick a fresh cycle, but answer from what is already known. Someone opening
-    // this panel is the one moment the answer must be current — and also the worst moment to
+    // this panel is the one moment the answer must be current â€” and also the worst moment to
     // make them wait on a backend that may be the very thing not responding.
     probe.refreshNow();
     return { body: uptime.snapshot(), ttl: 15 };
@@ -401,7 +401,7 @@ const routes = {
     // `standingInFor` is the reverse link: this bus covering someone else's trip. It travels
     // with the same payload so the client never has to ask a second question to know it.
     // `usually` answers a different question from the live reports: not "how full is this bus
-    // now" but "how full is this service at this hour, normally" — which is what someone
+    // now" but "how full is this service at this hour, normally" â€” which is what someone
     // choosing between the 08:00 and the 08:40 actually needs.
     const route = String(query.get('route') || '').trim().slice(0, 120);
     return {
@@ -416,7 +416,7 @@ const routes = {
 
   /**
    * The road line through a trip's stops, so the map can draw the route the bus actually
-   * takes. Answers `{ line: null }` rather than failing when geometry is unavailable — the
+   * takes. Answers `{ line: null }` rather than failing when geometry is unavailable â€” the
    * client falls back to straight lines.
    */
   'GET /api/geometry': async (_segments, query) => {
@@ -437,7 +437,7 @@ const routes = {
   /** When this service typically reaches a stop, from what we have actually observed. */
   'GET /api/reputation': async (_segments, query) => {
     const route = textParam(query.get('route'), 'route', 120);
-    // Without a stop, answer for the whole route in one call — a trip has twenty stops and
+    // Without a stop, answer for the whole route in one call â€” a trip has twenty stops and
     // twenty round trips to render a timeline would be absurd.
     // Which service, as its scheduled departure. A route pools every bus on it, and the median
     // of services fifteen hours apart is a time none of them keeps.
@@ -460,10 +460,10 @@ const routes = {
    * Bus stands inside the map's viewport.
    *
    * Answered entirely from our own gazetteer, which fills itself from trip responses the app is
-   * already making — so drawing every stand on every map costs the operator nothing at all.
+   * already making â€” so drawing every stand on every map costs the operator nothing at all.
    */
   'GET /api/stops': async (_segments, query) => {
-    // By id, for "where is this station" — the autocomplete knows names and ids but carries no
+    // By id, for "where is this station" â€” the autocomplete knows names and ids but carries no
     // coordinates, and there is no upstream call that resolves one by id.
     const ids = String(query.get('ids') || '').split(',').map((x) => x.trim()).filter(Boolean);
     if (ids.length) return { body: db.stations.positions(ids), ttl: 3600 };
@@ -551,7 +551,7 @@ const routes = {
     const { data } = await cached(`sta:${name.toLowerCase()}`, TTL.stations,
       () => gsrtc.stations(name), { staleMs: STALE.stations });
     // Autocomplete answers carry the id and the name together, so the gazetteer fills itself
-    // from traffic that was already happening — no extra call to an API we reuse on sufferance.
+    // from traffic that was already happening â€” no extra call to an API we reuse on sufferance.
     learnStations((data || []).map((r) =>
       [r.StationId, r.StationName, r.StationNameGuj, r.Center_Lat, r.Center_Lon]));
     return { body: data, ttl: 3600 };
@@ -605,8 +605,8 @@ const routes = {
       () => gsrtc.timetable({ from, to, date, type, page, pageSize }),
       { staleMs: STALE.timetable });
     // No station names are learned here, however tempting the fields look. A row's
-    // FromStationName is the *trip's* origin — "Bantva" on a Bantva-to-Narayan-Sarovar service
-    // — while FromStID is the station that was *searched for*. Pairing them files the right id
+    // FromStationName is the *trip's* origin â€” "Bantva" on a Bantva-to-Narayan-Sarovar service
+    // â€” while FromStID is the station that was *searched for*. Pairing them files the right id
     // under the wrong name, which is how 462 briefly became Bhuj instead of Morbi. Autocomplete
     // is the only response where the id and the name describe the same station.
     return { body: data, ttl: 60 };
@@ -618,7 +618,7 @@ const routes = {
     const start = String(query.get('start') || '').slice(0, 40);
     const plate = query.get('plate') ? plateParam(query.get('plate')) : '';
     // The trip rows name every stop but never the route they belong to, so the caller has to
-    // supply it — without one, observations from unrelated services collapse together and the
+    // supply it â€” without one, observations from unrelated services collapse together and the
     // history becomes meaningless.
     const route = String(query.get('route') || '').trim().slice(0, 120);
     const key = `trip:${tripId}:${status}:${start}`;
@@ -629,7 +629,7 @@ const routes = {
     // rather than to the route in general.
     if (plate && route) recordArrivals(plate, route, data, clockToMinutes(start));
     // And free station names. A trip names every stop on its route with the same ids the
-    // station list uses — verified against Rajkot 470, Morbi 462 and Tankara 1702 — so this
+    // station list uses â€” verified against Rajkot 470, Morbi 462 and Tankara 1702 â€” so this
     // fills the gazetteer far faster than autocomplete alone, which only ever learns the
     // stations somebody happened to type. Unlike the timetable rows, these ids and names do
     // describe the same place.
@@ -720,7 +720,7 @@ const postRoutes = {
    * Anonymous feature counters from the app.
    *
    * A strict allowlist, not free-form strings: the client can only ever increment a counter
-   * that already exists here, so a future bug — or a hostile caller — cannot turn this into a
+   * that already exists here, so a future bug â€” or a hostile caller â€” cannot turn this into a
    * place to store arbitrary text about somebody. Nothing about the caller is recorded, not
    * even the salted hash the report limiter uses; there is only a name and a tally.
    */
@@ -748,7 +748,7 @@ const postRoutes = {
       if (!STAT_EVENTS.has(name)) continue;
       db.metrics.bump('event', name);
       // Detail is constrained to a plate. The column is free text, and the one thing that must
-      // never end up in it is anything a rider typed — a validated plate cannot be a message.
+      // never end up in it is anything a rider typed â€” a validated plate cannot be a message.
       const detail = /^[A-Z]{2}-?[0-9]{1,2}-?[A-Z]{0,3}-?[0-9]{1,4}$/i.test(String(raw?.detail || ''))
         ? String(raw.detail).toUpperCase() : '';
       db.analytics.record(session, device, name, detail);
@@ -760,7 +760,7 @@ const postRoutes = {
   /**
    * Erases everything ever recorded for a device.
    *
-   * The app cannot prove which device it is — the id is the only claim — but that is the same
+   * The app cannot prove which device it is â€” the id is the only claim â€” but that is the same
    * id that produced the data in the first place, so anyone able to ask is the device whose
    * data it is. Deletes rather than flags: a policy that promises erasure has to erase.
    */
@@ -826,7 +826,7 @@ const postRoutes = {
     }
 
     // A replacement is only useful if it names the bus that actually turned up, and plateParam
-    // rejects anything that is not a plate — so a mistyped one is refused rather than stored
+    // rejects anything that is not a plate â€” so a mistyped one is refused rather than stored
     // and shown to the next rider as fact.
     let detail = '';
     if (kind === 'replaced') {
@@ -836,7 +836,7 @@ const postRoutes = {
 
     const reporter = reporterFor(req, body);
     if (db.reports.recentlyReported(plate, reporter, { occupancy: level !== null })) {
-      // Not an error — the report simply does not count twice.
+      // Not an error â€” the report simply does not count twice.
       return {
         body: {
           ok: true, counted: false,
@@ -872,7 +872,7 @@ function clockToMinutes(value) {
  * Banks the arrival times a trip response already contains.
  *
  * A stop the bus has passed carries a real `ArrivedTime`; one it has not is blank. Over enough
- * days this builds the picture the operator does not publish — when a service *typically*
+ * days this builds the picture the operator does not publish â€” when a service *typically*
  * reaches a stop, as opposed to when the timetable claims it will. Costs nothing: this data
  * arrived because a rider opened the route view.
  */
@@ -919,7 +919,7 @@ const MIME = {
   '.map': 'application/json; charset=utf-8',
 };
 const COMPRESSIBLE = /^(text\/|application\/(json|manifest\+json|javascript)|image\/svg)/;
-// Filenames are not content-hashed, so JS/CSS/HTML must revalidate on every load —
+// Filenames are not content-hashed, so JS/CSS/HTML must revalidate on every load â€”
 // otherwise a deploy can leave a browser running last hour's script against this hour's markup.
 // The ETag makes that revalidation a cheap 304. Images and fonts are immutable enough to cache.
 const REVALIDATE = /\.(html|js|mjs|css|webmanifest|json|map)$/;
@@ -928,7 +928,7 @@ const KNOWN_SPA_ROUTES = new Set(['', '/', '/home', '/track', '/routes', '/nearb
 /**
  * Paths a browser asks for on its own, wherever they happen to point.
  *
- * `/favicon.ico` is requested at the root regardless of the `<link rel="icon">` tags — on any
+ * `/favicon.ico` is requested at the root regardless of the `<link rel="icon">` tags â€” on any
  * response that is not the app shell, and by anything that never parses the markup. It was
  * answering 404 several dozen times a day, which is noise in a log that should be quiet enough
  * for a real fault to stand out.
@@ -938,6 +938,25 @@ const STATIC_ALIASES = new Map([['/favicon.ico', '/icons/favicon.png']]);
 async function serveStatic(req, res, pathname) {
   const rel = pathname === '/' ? '/index.html' : (STATIC_ALIASES.get(pathname) || pathname);
   const file = path.normalize(path.join(WEB_DIR, decodeURIComponent(rel)));
+  if (rel === '/js/map.js') {
+    try {
+      const key = process.env.CARTO_BASEMAP_KEY || '';
+      const raw = await fsp.readFile(file, 'utf8');
+
+      const injected = raw.replace(
+        /(\{r\}\.png)(?!\?key=)/g,
+        '$1' + (key ? `?key=${encodeURIComponent(key)}` : ''),
+      );
+
+      res.writeHead(200, {
+        'content-type': 'application/javascript; charset=utf-8',
+        'cache-control': 'no-store',
+      });
+      return res.end(injected);
+    } catch {
+      return send(req, res, 500, { error: 'map asset failed' });
+    }
+  }
   if (!file.startsWith(WEB_DIR + path.sep) && file !== path.join(WEB_DIR, 'index.html')) {
     return send(req, res, 403, { error: 'forbidden' });
   }
@@ -982,7 +1001,7 @@ function baseHeaders(req) {
       "style-src 'self' 'unsafe-inline'",
       // Tile hosts, and nothing else. Named explicitly rather than widened to https: so that a
       // future style cannot quietly start fetching images from anywhere.
-      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com",
+      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://tile.openstreetmap.org",
       "connect-src 'self'",
       "font-src 'self'",
       "manifest-src 'self'",
@@ -1079,8 +1098,8 @@ const idish = (v) => (/^[A-Za-z0-9_-]{8,64}$/.test(String(v || '')) ? String(v) 
 /**
  * Which kind of device asked, in three buckets.
  *
- * Deliberately coarse. A full user-agent string is close to a fingerprint — enough entropy to
- * single someone out — while "android / ios / desktop" answers the only question worth asking
+ * Deliberately coarse. A full user-agent string is close to a fingerprint â€” enough entropy to
+ * single someone out â€” while "android / ios / desktop" answers the only question worth asking
  * (where should effort go) and identifies nobody.
  */
 function platformOf(ua = '') {
@@ -1098,7 +1117,7 @@ const sendHtml = (req, res, status, html, nonce) => sendBuffer(req, res, status,
   'cache-control': 'no-store',
   // The dashboard is the one page that must never be indexed or embedded anywhere.
   'x-robots-tag': 'noindex, nofollow',
-  // The app's policy is `script-src 'self'`, which blocks inline scripts — and the dashboard is
+  // The app's policy is `script-src 'self'`, which blocks inline scripts â€” and the dashboard is
   // a single self-contained page with its own. A per-response nonce lets exactly that one
   // script run, rather than allowing inline scripts across the whole origin, which would undo
   // the protection everywhere for the sake of one page nobody but the owner ever loads.
@@ -1113,7 +1132,7 @@ const sendHtml = (req, res, status, html, nonce) => sendBuffer(req, res, status,
     // A nonce covers <style> blocks but not inline style attributes, and the bars size
     // themselves with one. Scoped to attributes only, so a <style> block still needs the nonce.
     "style-src-attr 'unsafe-inline'",
-    "img-src 'self' data:",
+    "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://tile.openstreetmap.org",
     "connect-src 'self'",
   ].join('; '),
 });
@@ -1128,7 +1147,7 @@ async function handleAdmin(req, res, url) {
   const authed = admin.validSession(admin.readCookie(req.headers.cookie));
   // Secure unless we are plainly on a local dev host. Deriving this from `x-forwarded-proto`
   // alone silently produced a cookie without `Secure` in production, because nginx here does
-  // not set that header — and a session cookie that will ride along a plaintext request is
+  // not set that header â€” and a session cookie that will ride along a plaintext request is
   // exactly the thing the flag exists to prevent. Failing *closed* means the worst case is a
   // dev box that cannot log in over http, which is loud and harmless.
   const host = String(req.headers.host || '').split(':')[0];
@@ -1170,7 +1189,7 @@ async function handleAdmin(req, res, url) {
 /**
  * Everything the dashboard shows.
  *
- * Every figure is an aggregate keyed on a bus, a route or an endpoint — never on a person.
+ * Every figure is an aggregate keyed on a bus, a route or an endpoint â€” never on a person.
  * There is no identifier in the database to group by, which is what keeps the app's own
  * "no tracking" promise true by construction rather than by good intentions.
  */
@@ -1347,13 +1366,13 @@ const server = http.createServer(async (req, res) => {
   const segments = url.pathname.split('/').filter(Boolean);      // ['api', kind, ...rest]
 
   // Aggregate counters for the dashboard. Keyed on the thing requested, never on the requester
-  // — there is no identifier recorded here to group by, which is what keeps the app's own
+  // â€” there is no identifier recorded here to group by, which is what keeps the app's own
   // "no tracking" promise true by construction rather than by remembering to be careful.
   try {
     db.metrics.bump('endpoint', segments[1] || 'root');
     // Only well-formed keys are counted. The bump happens before the route handler validates
-    // anything, so without this a rejected request still left its junk in the table — the QA
-    // suite's own XSS probe showed up in "most tracked buses" — and anyone could have padded
+    // anything, so without this a rejected request still left its junk in the table â€” the QA
+    // suite's own XSS probe showed up in "most tracked buses" â€” and anyone could have padded
     // the table with arbitrary strings simply by asking for them.
     const plate = decodeURIComponent(segments[2] || '');
     if (segments[1] === 'vehicle' && /^[A-Z]{2}-?[0-9]{1,2}-?[A-Z]{0,3}-?[0-9]{1,4}$/i.test(plate)) {
@@ -1366,7 +1385,7 @@ const server = http.createServer(async (req, res) => {
         db.metrics.bump('route', `${from}>${to}`);
       }
     }
-    // When the app is used, in IST — the shape of a commuter day, which is what tells you
+    // When the app is used, in IST â€” the shape of a commuter day, which is what tells you
     // whether the morning board or the evening one deserves the next piece of work.
     db.metrics.bump('hour', istHour());
     // Which platforms actually turn up. This is the number that decides whether the iOS work
@@ -1415,14 +1434,14 @@ server.keepAliveTimeout = 65000;
 try {
   db.open();
 } catch (e) {
-  log('error', 'database unavailable — push, history and reports are disabled', { message: e.message });
+  log('error', 'database unavailable â€” push, history and reports are disabled', { message: e.message });
 }
 
 /**
  * Housekeeping.
  *
  * Nothing was calling the sweeps, so every table this app has ever written was growing without
- * limit — reports and fired alerts included, long before analytics existed. On a 1 GB instance
+ * limit â€” reports and fired alerts included, long before analytics existed. On a 1 GB instance
  * that is a slow leak with a hard floor. Runs shortly after boot so a fresh deploy tidies up,
  * then every six hours.
  *
@@ -1448,14 +1467,14 @@ harvest.start(db);
 geocode.start(db);
 // One-off, well after boot so a deploy is never a burst.
 // Wrapped, not just `.catch()`: a missing export throws *synchronously* inside the timer
-// callback, where there is no promise to catch it — which is how a refactor that dropped this
+// callback, where there is no promise to catch it â€” which is how a refactor that dropped this
 // function turned into an uncaught exception firing every 45 seconds in production.
 setTimeout(() => {
   try { probe.warmStations(db)?.catch?.(() => {}); }
   catch (e) { log('warn', 'station warm failed to start', { message: e.message }); }
 }, 45000).unref();
 
-// Coordinates, after the names — the name sweep is 26 quick calls and this one is a few
+// Coordinates, after the names â€” the name sweep is 26 quick calls and this one is a few
 // thousand slow ones, so letting it start first keeps the gazetteer usable sooner. Same
 // synchronous-throw guard, for the same reason.
 setTimeout(() => {
@@ -1496,3 +1515,5 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     }, 8000).unref();
   });
 }
+
+
