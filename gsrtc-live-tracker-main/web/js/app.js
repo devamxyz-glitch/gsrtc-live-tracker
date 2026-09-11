@@ -1,4 +1,4 @@
-/* App shell: appearance, navigation, deep links, offline handling, service worker. */
+﻿/* App shell: appearance, navigation, deep links, offline handling, service worker. */
 
 import { icon } from './icons.js';
 import { t, setLang, detectLang } from './i18n.js';
@@ -6,6 +6,7 @@ import * as store from './store.js';
 import { on, emit } from './events.js';
 import { $, $$, esc, closeSheet, isSheetOpen, toast } from './ui.js';
 import { refreshTiles } from './map.js';
+import * as about from './about.js';
 
 import * as home from './home.js';
 import * as track from './track.js';
@@ -16,7 +17,7 @@ import * as stats from './stats.js';
 import * as trip from './trip.js';
 import * as install from './install.js';
 
-const SCREENS = { home, track, routes, nearby, settings };
+const SCREENS = { home, track, routes, nearby, settings, about };
 const TABS = ['home', 'track', 'routes', 'nearby'];
 let current = 'home';
 
@@ -42,7 +43,7 @@ function applyLanguage() {
 
 /** Text that lives in index.html rather than inside a screen's render function. */
 function paintStaticText() {
-  document.title = `${t('appName')} — ${t('tagline')}`;
+  document.title = `${t('appName')} â€” ${t('tagline')}`;
   $('#app-title').textContent = t('appName');
   $('#app-sub').textContent = t('tagline');
   $('#plate').placeholder = t('platePlaceholder');
@@ -72,7 +73,7 @@ function paintStaticText() {
 /* ------------------------------------------------------------------ navigation */
 function go(name, { push = true } = {}) {
   if (!SCREENS[name]) return;
-  // Re-showing the current screen still counts as a view — and crucially, the very first
+  // Re-showing the current screen still counts as a view â€” and crucially, the very first
   // `go('home')` on boot lands here, because `current` already starts as 'home'. Without this
   // the opening screen was never recorded at all, so "where people start" showed Track for
   // everyone and Home for nobody.
@@ -147,7 +148,7 @@ function boot() {
 /**
  * Opens whatever the URL asked for: a bus, a route, or a screen.
  *
- * Also decides how the session began, before anything else is recorded — a shared link that
+ * Also decides how the session began, before anything else is recorded â€” a shared link that
  * works is the difference between the app spreading and not, and there is no other way to see
  * it. `replaceState` rather than push, so Back leaves the app instead of returning to a
  * parameterised URL the rider never chose to visit.
@@ -207,14 +208,14 @@ function dismissSplash() {
 /**
  * Onboarding, in the order the permissions actually work.
  *
- * Install first, permissions second — and only once installed. On iOS notifications simply do
+ * Install first, permissions second â€” and only once installed. On iOS notifications simply do
  * not exist until the app is on the home screen, so asking before that is asking for something
  * that cannot be granted; and a browser permission is a one-shot, where a single Deny kills the
  * API for the origin for good. Spending that one chance while the answer cannot stick is the
  * worst possible order.
  *
  * The walkthrough is switched off for now. It was reaching 40 devices and only 18 finished it,
- * with 19 explicitly skipping — a tour that more than half the people abandon is in the way,
+ * with 19 explicitly skipping â€” a tour that more than half the people abandon is in the way,
  * not helping. It stays replayable from Settings for anyone who wants it.
  */
 function maybeOnboard() {
@@ -238,7 +239,7 @@ function maybeOnboard() {
  * Three things have to be true, and only the first two are ours.
  *
  * **The script URL has to change.** `sw.js` is fetched by the browser like any other file, and
- * Cloudflare rewrites our `no-cache` to `max-age=14400` on the way out — so a browser will sit
+ * Cloudflare rewrites our `no-cache` to `max-age=14400` on the way out â€” so a browser will sit
  * on a four-hour-old service worker and never learn there is a new one. `index.html` is still
  * served `no-cache`, and it points at `js/app.js?v=<version>`, so the *app* updates promptly on
  * a release; it is the worker that goes stale. Registering it under the same version stamp makes
@@ -287,10 +288,11 @@ function registerServiceWorker() {
       applyWhenSafe();
       if (Date.now() - lastCheck < UPDATE_CHECK_MS) return;
       lastCheck = Date.now();
-      reg.update().catch(() => { /* offline, or the check was throttled — try again later */ });
+      reg.update().catch(() => { /* offline, or the check was throttled â€” try again later */ });
     });
   }).catch(() => { /* offline support is a bonus, never a blocker */ });
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
+

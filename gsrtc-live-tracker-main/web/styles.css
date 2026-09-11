@@ -1413,3 +1413,99 @@ body.tour-open { overflow: hidden; }
   .btn:active, .chip:active, .tile:active, .list-row:active,
   .iconbtn:active, .seg button:active, .ac-item:active { transform: none; }
 }
+@'
+/* Devam Namera premium brand layer */
+.s-founder {
+  margin-top: 10px;
+  font: 600 11.5px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: .45px;
+  color: rgba(255,255,255,.76);
+  animation: splash-up .5s cubic-bezier(.2,.8,.2,1) .30s both;
+}
+
+.s-founder span,
+.brand-credit span {
+  color: var(--accent-bg);
+  margin: 0 4px;
+}
+
+.brand-credit {
+  margin-top: 2px;
+  font-size: calc(9.5px * var(--step));
+  line-height: 1.2;
+  color: var(--accent);
+  letter-spacing: .35px;
+  white-space: nowrap;
+  opacity: .9;
+}
+
+.devam-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 22px 0 2px;
+  padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent-bg) 24%, var(--line));
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 180% at 50% 0%, color-mix(in srgb, var(--accent-soft) 58%, transparent), transparent 68%),
+    color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  animation: brand-rise .45s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.devam-brand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -35%;
+  width: 35%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-bg), transparent);
+  animation: brand-sweep 2.8s ease-in-out infinite;
+}
+
+.devam-brand-name {
+  font-size: calc(14px * var(--step));
+  font-weight: 750;
+  letter-spacing: .2px;
+  color: var(--ink);
+}
+
+.devam-brand-role {
+  font-size: calc(10.5px * var(--step));
+  font-weight: 600;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.devam-brand:hover {
+  border-color: color-mix(in srgb, var(--accent-bg) 48%, var(--line));
+  box-shadow: var(--shadow-2);
+}
+
+@keyframes brand-rise {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes brand-sweep {
+  0%, 20% { transform: translateX(0); opacity: 0; }
+  35% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateX(390%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .devam-brand,
+  .devam-brand::before,
+  .s-founder {
+    animation: none !important;
+  }
+}
+'@ | Add-Content ".\web\styles.css" -Encoding UTF8
+

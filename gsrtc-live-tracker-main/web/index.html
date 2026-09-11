@@ -1,10 +1,17 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="light" data-text="normal">
+
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
 <title>ST Tracker — Gujarat ST buses, live</title>
-<meta name="description" content="Track Gujarat ST (GSRTC) buses live on a map, search timetables between two stations, and find the stops around you." />
+
+<meta
+  name="description"
+  content="Track Gujarat ST (GSRTC) buses live on a map, search timetables between two stations, and find the stops around you."
+/>
+
 <meta name="theme-color" content="#ffffff" />
 <meta name="color-scheme" content="light dark" />
 
@@ -12,316 +19,1188 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
 <link rel="icon" href="icons/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="ST Tracker" />
 <meta name="mobile-web-app-capable" content="yes" />
 
 <style>
-/* Boot splash.
-   Inlined rather than left to styles.css because it must paint on the very first frame — a
-   splash that arrives after the stylesheet has downloaded has missed the moment it exists for.
-   It hides itself on a CSS timer as well as on the app's signal, so a script that never runs
-   leaves a usable app rather than a permanent logo. */
+/* ============================================================
+   BOOT SPLASH
+   ============================================================ */
+
 #splash {
-  position: fixed; inset: 0; z-index: 9999;
-  /* Flex, not grid: `grid-auto-flow: row` gave the three elements an equal share of the whole
-     viewport and flung them to the top, middle and bottom of the screen. They are one group. */
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
   background: #1b3c77;
-  background: radial-gradient(118% 78% at 50% 16%, #2d5fae 0%, #1e4181 46%, #142f5d 100%);
+  background:
+    radial-gradient(
+      118% 78% at 50% 16%,
+      #2d5fae 0%,
+      #1e4181 46%,
+      #142f5d 100%
+    );
+
   color: #fff;
+
   animation: splash-out .4s ease 3.5s forwards;
 }
-/* The mark sits in its own light, so it reads as part of the screen rather than as a sticker
-   pasted onto it — which is what the plain white tile looked like. */
+
 #splash .s-mark {
-  width: 104px; height: 104px;
+  width: 104px;
+  height: 104px;
+
   filter: drop-shadow(0 14px 34px rgba(0, 0, 0, .34));
-  animation: splash-mark .62s cubic-bezier(.18, .9, .24, 1) both;
+
+  animation:
+    splash-mark .62s cubic-bezier(.18, .9, .24, 1) both;
 }
+
 #splash .s-name {
   margin-top: 22px;
-  font: 700 23px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  font:
+    700 23px/1.2
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
   letter-spacing: -.3px;
-  animation: splash-up .5s cubic-bezier(.2, .8, .2, 1) .14s both;
+
+  animation:
+    splash-up .5s cubic-bezier(.2, .8, .2, 1) .14s both;
 }
+
 #splash .s-sub {
   margin-top: 7px;
-  font: 500 13.5px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  font:
+    500 13.5px/1.2
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
   color: rgba(255, 255, 255, .62);
-  animation: splash-up .5s cubic-bezier(.2, .8, .2, 1) .22s both;
+
+  animation:
+    splash-up .5s cubic-bezier(.2, .8, .2, 1) .22s both;
 }
-/* A moving line rather than a spinner: it says "starting" without implying a percentage the
-   app has no way to know. */
+
+#splash .s-founder {
+  margin-top: 12px;
+
+  font:
+    650 11.5px/1.35
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
+  letter-spacing: .45px;
+
+  color: rgba(255, 255, 255, .91);
+
+  animation:
+    splash-up .5s cubic-bezier(.2, .8, .2, 1) .30s both;
+}
+
+#splash .s-founder span {
+  color: #f4ad52;
+  margin: 0 4px;
+}
+
+#splash .s-contact {
+  margin-top: 6px;
+
+  font:
+    500 10px/1.35
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
+  letter-spacing: .25px;
+
+  color: rgba(255, 255, 255, .58);
+
+  animation:
+    splash-up .5s cubic-bezier(.2, .8, .2, 1) .38s both;
+}
+
 #splash .s-load {
-  position: relative; overflow: hidden;
-  width: 104px; height: 3px; margin-top: 30px; border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+
+  width: 104px;
+  height: 3px;
+
+  margin-top: 30px;
+
+  border-radius: 3px;
   background: rgba(255, 255, 255, .17);
-  animation: splash-up .5s ease .3s both;
+
+  animation: splash-up .5s ease .42s both;
 }
+
 #splash .s-load::after {
-  content: ''; position: absolute; inset: 0;
-  border-radius: 3px; background: rgba(255, 255, 255, .85);
-  animation: splash-sweep 1.15s cubic-bezier(.5, 0, .5, 1) infinite;
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: 3px;
+
+  background: rgba(255, 255, 255, .85);
+
+  animation:
+    splash-sweep 1.15s cubic-bezier(.5, 0, .5, 1) infinite;
 }
-#splash.done { animation: splash-out .3s ease forwards; }
+
+#splash.done {
+  animation: splash-out .3s ease forwards;
+}
 
 @keyframes splash-mark {
-  from { opacity: 0; transform: translateY(10px) scale(.86); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.86);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-@keyframes splash-up { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+
+@keyframes splash-up {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes splash-sweep {
-  0% { transform: translateX(-100%) scaleX(.45); }
-  100% { transform: translateX(100%) scaleX(.45); }
+  0% {
+    transform: translateX(-100%) scaleX(.45);
+  }
+
+  100% {
+    transform: translateX(100%) scaleX(.45);
+  }
 }
-@keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  #splash, #splash * { animation-duration: .001ms !important; animation-delay: 0s !important; }
-  #splash .s-load { display: none; }
+  #splash,
+  #splash * {
+    animation-duration: .001ms !important;
+    animation-delay: 0s !important;
+  }
+
+  #splash .s-load {
+    display: none;
+  }
 }
 </style>
+
 <link rel="stylesheet" href="vendor/leaflet.css?v=1.9.4" />
-<link rel="stylesheet" href="styles.css?v=1.46.2" />
+<link rel="stylesheet" href="styles.css?v=1.46.3" />
+
 </head>
+
 <body>
 
-<div id="splash" role="status" aria-label="ST Tracker is starting">
-  <svg class="s-mark" viewBox="0 0 512 512" aria-hidden="true">
+<!-- ============================================================
+     SPLASH
+     ============================================================ -->
+
+<div
+  id="splash"
+  role="status"
+  aria-label="ST Tracker is starting"
+>
+
+  <svg
+    class="s-mark"
+    viewBox="0 0 512 512"
+    aria-hidden="true"
+  >
     <rect x="120" y="74" width="272" height="316" rx="62" fill="#ffffff"/>
     <rect x="156" y="110" width="200" height="32" rx="16" fill="#e8912f"/>
     <rect x="156" y="164" width="200" height="104" rx="28" fill="#1e4181"/>
-    <circle cx="186" cy="326" r="20" fill="#e8912f"/><circle cx="326" cy="326" r="20" fill="#e8912f"/>
-    <rect x="140" y="384" width="60" height="40" rx="20" fill="#0a1730"/>
-    <rect x="312" y="384" width="60" height="40" rx="20" fill="#0a1730"/>
-    <circle cx="404" cy="96" r="52" fill="#1e4181"/><circle cx="404" cy="96" r="34" fill="#12b76a"/>
+
+    <circle
+      cx="186"
+      cy="326"
+      r="20"
+      fill="#e8912f"
+    />
+
+    <circle
+      cx="326"
+      cy="326"
+      r="20"
+      fill="#e8912f"
+    />
+
+    <rect
+      x="140"
+      y="384"
+      width="60"
+      height="40"
+      rx="20"
+      fill="#0a1730"
+    />
+
+    <rect
+      x="312"
+      y="384"
+      width="60"
+      height="40"
+      rx="20"
+      fill="#0a1730"
+    />
+
+    <circle
+      cx="404"
+      cy="96"
+      r="52"
+      fill="#1e4181"
+    />
+
+    <circle
+      cx="404"
+      cy="96"
+      r="34"
+      fill="#12b76a"
+    />
   </svg>
-  <div class="s-name">ST Tracker</div>
-  <div class="s-sub">Gujarat ST buses, live</div>
-  <div class="s-load" aria-hidden="true"></div>
+
+  <div class="s-name">
+    ST Tracker
+  </div>
+
+  <div class="s-sub">
+    Gujarat ST buses, live
+  </div>
+
+  <div class="s-founder">
+    Devam Namera
+    <span>•</span>
+    Founder &amp; Lead Developer
+  </div>
+
+  <div class="s-contact">
+    8780692285 · devamxyz@gmail.com
+  </div>
+
+  <div
+    class="s-load"
+    aria-hidden="true"
+  ></div>
+
 </div>
 
-<div class="offline-bar" id="offline-bar" role="status">You are offline</div>
+<div
+  class="offline-bar"
+  id="offline-bar"
+  role="status"
+>
+  You are offline
+</div>
+
+<!-- ============================================================
+     APP HEADER
+     ============================================================ -->
 
 <header class="app-header">
-  <svg class="mark" viewBox="0 0 512 512" aria-hidden="true">
-    <rect width="512" height="512" rx="114" fill="#1b3c77"/>
-    <rect x="146" y="96" width="220" height="272" rx="50" fill="#fff"/>
-    <rect x="176" y="126" width="160" height="28" rx="14" fill="#e8912f"/>
-    <rect x="176" y="172" width="160" height="84" rx="24" fill="#12305f"/>
-    <circle cx="200" cy="308" r="17" fill="#e8912f"/><circle cx="312" cy="308" r="17" fill="#e8912f"/>
-    <rect x="164" y="360" width="52" height="34" rx="17" fill="#0a1730"/>
-    <rect x="296" y="360" width="52" height="34" rx="17" fill="#0a1730"/>
-    <circle cx="412" cy="100" r="46" fill="#1b3c77"/><circle cx="412" cy="100" r="30" fill="#12b76a"/>
+
+  <svg
+    class="mark"
+    viewBox="0 0 512 512"
+    aria-hidden="true"
+  >
+    <rect
+      width="512"
+      height="512"
+      rx="114"
+      fill="#1b3c77"
+    />
+
+    <rect
+      x="146"
+      y="96"
+      width="220"
+      height="272"
+      rx="50"
+      fill="#fff"
+    />
+
+    <rect
+      x="176"
+      y="126"
+      width="160"
+      height="28"
+      rx="14"
+      fill="#e8912f"
+    />
+
+    <rect
+      x="176"
+      y="172"
+      width="160"
+      height="84"
+      rx="24"
+      fill="#12305f"
+    />
+
+    <circle
+      cx="200"
+      cy="308"
+      r="17"
+      fill="#e8912f"
+    />
+
+    <circle
+      cx="312"
+      cy="308"
+      r="17"
+      fill="#e8912f"
+    />
+
+    <rect
+      x="164"
+      y="360"
+      width="52"
+      height="34"
+      rx="17"
+      fill="#0a1730"
+    />
+
+    <rect
+      x="296"
+      y="360"
+      width="52"
+      height="34"
+      rx="17"
+      fill="#0a1730"
+    />
+
+    <circle
+      cx="412"
+      cy="100"
+      r="46"
+      fill="#1b3c77"
+    />
+
+    <circle
+      cx="412"
+      cy="100"
+      r="30"
+      fill="#12b76a"
+    />
   </svg>
+
   <div class="titles">
-    <h1 id="app-title">ST Tracker</h1>
-    <div class="sub" id="app-sub">Gujarat ST buses, live</div>
+
+    <h1 id="app-title">
+      ST Tracker
+    </h1>
+
+    <div
+      class="sub"
+      id="app-sub"
+    >
+      Gujarat ST buses, live
+    </div>
+
+    <div class="brand-credit">
+      Devam Namera
+      <span>•</span>
+      Founder &amp; Lead Developer
+    </div>
+
   </div>
-  <button class="iconbtn spacer" id="settings-btn" aria-label="Settings">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
-      <path d="M19.5 12a7.6 7.6 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7.5 7.5 0 0 0-2.1-1.2L14.6 3H9.4l-.4 2.7a7.5 7.5 0 0 0-2.1 1.2l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7.5 7.5 0 0 0 2.1 1.2l.4 2.7h5.2l.4-2.7a7.5 7.5 0 0 0 2.1-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>
+
+  <button
+    class="iconbtn spacer"
+    id="settings-btn"
+    aria-label="Settings"
+  >
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"
+      />
+
+      <path
+        d="M19.5 12a7.6 7.6 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7.5 7.5 0 0 0-2.1-1.2L14.6 3H9.4l-.4 2.7a7.5 7.5 0 0 0-2.1 1.2l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7.5 7.5 0 0 0 2.1 1.2l.4 2.7h5.2l.4-2.7a7.5 7.5 0 0 0 2.1-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"
+      />
     </svg>
   </button>
+
 </header>
+
+<!-- ============================================================
+     MAIN
+     ============================================================ -->
 
 <main class="wrap">
 
-  <!-- ------------------------------------------------------------ home -->
-  <section id="s-home" class="screen on" aria-label="Home">
-    <!-- The track box lives here as well as on the Track screen. Home used to be nothing but
-         empty-state cards for things a new rider had not done yet, while the one thing they
-         came to do was a tab away. -->
+  <!-- ==========================================================
+       HOME
+       ========================================================== -->
+
+  <section
+    id="s-home"
+    class="screen on"
+    aria-label="Home"
+  >
+
     <div class="row">
+
       <div class="field grow">
+
         <span class="lead">
-          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" aria-hidden="true">
-            <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="m20.5 20.5-4.6-4.6"/>
+          <svg
+            class="i"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
+            <path d="m20.5 20.5-4.6-4.6"/>
           </svg>
         </span>
-        <input id="home-plate" class="input plate" type="text" autocomplete="off"
-          inputmode="latin" spellcheck="false" placeholder="E.G. GJ-18-ZT-1028"
-          aria-label="Bus number" role="combobox" aria-expanded="false"
-          aria-controls="home-plate-ac" aria-autocomplete="list" />
-        <div id="home-plate-ac" class="ac" role="listbox" aria-label="Matching buses"></div>
+
+        <input
+          id="home-plate"
+          class="input plate"
+          type="text"
+          autocomplete="off"
+          inputmode="latin"
+          spellcheck="false"
+          placeholder="E.G. GJ-18-ZT-1028"
+          aria-label="Bus number"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="home-plate-ac"
+          aria-autocomplete="list"
+        />
+
+        <div
+          id="home-plate-ac"
+          class="ac"
+          role="listbox"
+          aria-label="Matching buses"
+        ></div>
+
       </div>
-      <button class="btn" id="home-track-go">Track</button>
+
+      <button
+        class="btn"
+        id="home-track-go"
+      >
+        Track
+      </button>
+
     </div>
 
-    <button class="status-dot" id="status-dot" type="button" aria-expanded="false"
-      aria-label="Service status" hidden>
-      <span class="sd-light"></span><span class="sd-text"></span>
+    <button
+      class="status-dot"
+      id="status-dot"
+      type="button"
+      aria-expanded="false"
+      aria-label="Service status"
+      hidden
+    >
+      <span class="sd-light"></span>
+      <span class="sd-text"></span>
     </button>
 
-    <div id="home-body" class="flow"></div>
+    <div
+      id="home-body"
+      class="flow"
+    ></div>
+
+    <div
+      class="devam-brand"
+      aria-label="Developed by Devam Namera"
+    >
+      <span class="devam-brand-name">
+        Devam Namera
+      </span>
+
+      <span class="devam-brand-role">
+        Founder &amp; Lead Developer
+      </span>
+    </div>
+
   </section>
 
-  <!-- ------------------------------------------------------------ track -->
-  <section id="s-track" class="screen flow" aria-label="Track">
+  <!-- ==========================================================
+       TRACK
+       ========================================================== -->
+
+  <section
+    id="s-track"
+    class="screen flow"
+    aria-label="Track"
+  >
+
     <div class="row">
+
       <div class="field grow">
+
         <span class="lead">
-          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" aria-hidden="true">
-            <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="m20.5 20.5-4.6-4.6"/>
+          <svg
+            class="i"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
+            <path d="m20.5 20.5-4.6-4.6"/>
           </svg>
         </span>
-        <input id="plate" class="input plate" type="text" inputmode="text" autocomplete="off"
-          autocapitalize="characters" spellcheck="false" placeholder="e.g. GJ-18-ZT-1028" aria-label="Bus number plate" />
-        <div class="ac" id="plate-ac"></div>
+
+        <input
+          id="plate"
+          class="input plate"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="e.g. GJ-18-ZT-1028"
+          aria-label="Bus number plate"
+        />
+
+        <div
+          class="ac"
+          id="plate-ac"
+        ></div>
+
       </div>
-      <button class="btn" id="track-go">Track</button>
+
+      <button
+        class="btn"
+        id="track-go"
+      >
+        Track
+      </button>
+
     </div>
-    <!--
-      Most riders track by plate; a PNR lookup is for the minority who booked online. It had a
-      permanent search row of its own, which spent the most valuable space on the screen on the
-      rarest action. Collapsed behind one line that says what it is for.
-    -->
-    <button class="pnr-toggle" id="pnr-toggle" aria-expanded="false" aria-controls="pnr-row">
-      <svg class="i i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+    <button
+      class="pnr-toggle"
+      id="pnr-toggle"
+      aria-expanded="false"
+      aria-controls="pnr-row"
+    >
+
+      <svg
+        class="i i-sm"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
         <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/>
-        <path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/>
+        <path d="M13 5v2"/>
+        <path d="M13 11v2"/>
+        <path d="M13 17v2"/>
       </svg>
-      <span id="pnr-toggle-label">Booked online? Look up by PNR</span>
-      <svg class="i i-sm chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9 6.5 6.5L18.5 9"/></svg>
+
+      <span id="pnr-toggle-label">
+        Booked online? Look up by PNR
+      </span>
+
+      <svg
+        class="i i-sm chev"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m5.5 9 6.5 6.5L18.5 9"/>
+      </svg>
+
     </button>
-    <div class="row" id="pnr-row" hidden>
+
+    <div
+      class="row"
+      id="pnr-row"
+      hidden
+    >
+
       <div class="field grow">
+
         <span class="lead">
-          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            class="i"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/>
-            <path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/>
+            <path d="M13 5v2"/>
+            <path d="M13 11v2"/>
+            <path d="M13 17v2"/>
           </svg>
         </span>
-        <input id="pnr" class="input plate" type="text" autocomplete="off"
-          autocapitalize="characters" spellcheck="false" placeholder="e.g. G12006883" aria-label="PNR number" />
+
+        <input
+          id="pnr"
+          class="input plate"
+          type="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="e.g. G12006883"
+          aria-label="PNR number"
+        />
+
       </div>
-      <button class="btn ghost" id="pnr-go">Lookup</button>
+
+      <button
+        class="btn ghost"
+        id="pnr-go"
+      >
+        Lookup
+      </button>
+
     </div>
-    <div class="card pad flow" id="pnr-card" style="display:none"></div>
-    <div class="chips" id="track-chips"></div>
+
+    <div
+      class="card pad flow"
+      id="pnr-card"
+      style="display:none"
+    ></div>
+
+    <div
+      class="chips"
+      id="track-chips"
+    ></div>
+
     <div class="map-wrap">
-      <div id="map" class="map"></div>
-      <div class="map-fabs" id="map-fabs"></div>
+
+      <div
+        id="map"
+        class="map"
+      ></div>
+
+      <div
+        class="map-fabs"
+        id="map-fabs"
+      ></div>
+
     </div>
-    <div class="card" id="track-status"></div>
+
+    <div
+      class="card"
+      id="track-status"
+    ></div>
+
   </section>
 
-  <!-- ------------------------------------------------------------ routes -->
-  <section id="s-routes" class="screen flow" aria-label="Routes">
+  <!-- ==========================================================
+       ROUTES
+       ========================================================== -->
+
+  <section
+    id="s-routes"
+    class="screen flow"
+    aria-label="Routes"
+  >
+
     <div class="card pad">
+
       <div class="od">
+
         <div class="stack">
+
           <div class="field">
+
             <span class="lead">
-              <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+              <svg
+                class="i"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M20 10.5c0 5.8-8 11.5-8 11.5s-8-5.7-8-11.5a8 8 0 1 1 16 0z"/>
                 <path d="M12 13a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2z"/>
               </svg>
+
             </span>
-            <input id="from" class="input" type="text" autocomplete="off" placeholder="Starting station" aria-label="From" />
-            <div class="ac" id="from-ac"></div>
+
+            <input
+              id="from"
+              class="input"
+              type="text"
+              autocomplete="off"
+              placeholder="Starting station"
+              aria-label="From"
+            />
+
+            <div
+              class="ac"
+              id="from-ac"
+            ></div>
+
           </div>
+
           <div class="field">
+
             <span class="lead">
-              <svg class="i" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7"
-                stroke-linejoin="round" aria-hidden="true">
+
+              <svg
+                class="i"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M4 15.5s1.2-1 4-1 5 2 8 2 4-1 4-1V4s-1.2 1-4 1-5-2-8-2-4 1-4 1z"/>
-                <path d="M4 22v-6.5" fill="none"/>
+                <path
+                  d="M4 22v-6.5"
+                  fill="none"
+                />
               </svg>
+
             </span>
-            <input id="to" class="input" type="text" autocomplete="off" placeholder="Destination station" aria-label="To" />
-            <div class="ac" id="to-ac"></div>
+
+            <input
+              id="to"
+              class="input"
+              type="text"
+              autocomplete="off"
+              placeholder="Destination station"
+              aria-label="To"
+            />
+
+            <div
+              class="ac"
+              id="to-ac"
+            ></div>
+
           </div>
+
         </div>
-        <button class="swap" id="route-swap" aria-label="Swap">
-          <svg class="i i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M7.5 3.5v17"/><path d="m3.5 16.5 4 4 4-4"/><path d="M16.5 20.5v-17"/><path d="m12.5 7.5 4-4 4 4"/>
+
+        <button
+          class="swap"
+          id="route-swap"
+          aria-label="Swap"
+        >
+
+          <svg
+            class="i i-sm"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M7.5 3.5v17"/>
+            <path d="m3.5 16.5 4 4 4-4"/>
+            <path d="M16.5 20.5v-17"/>
+            <path d="m12.5 7.5 4-4 4 4"/>
           </svg>
+
         </button>
+
       </div>
+
       <div class="row row-date">
+
         <div class="field grow">
-          <input id="date" class="input plain" type="date" aria-label="Date" />
+
+          <input
+            id="date"
+            class="input plain"
+            type="date"
+            aria-label="Date"
+          />
+
         </div>
-        <button class="btn" id="find">Find buses</button>
+
+        <button
+          class="btn"
+          id="find"
+        >
+          Find buses
+        </button>
+
       </div>
+
     </div>
-    <div class="chips" id="routes-filters"></div>
-    <div id="routes-results" class="flow"></div>
+
+    <div
+      class="chips"
+      id="routes-filters"
+    ></div>
+
+    <div
+      id="routes-results"
+      class="flow"
+    ></div>
+
   </section>
 
-  <!-- ------------------------------------------------------------ nearby -->
-  <section id="s-nearby" class="screen flow" aria-label="Nearby">
-    <div class="sec-title" id="nearby-title">Stations near you</div>
-    <button class="btn block" id="locate">Use my location</button>
-    <div id="nearby-body" class="flow"></div>
+  <!-- ==========================================================
+       NEARBY
+       ========================================================== -->
+
+  <section
+    id="s-nearby"
+    class="screen flow"
+    aria-label="Nearby"
+  >
+
+    <div
+      class="sec-title"
+      id="nearby-title"
+    >
+      Stations near you
+    </div>
+
+    <button
+      class="btn block"
+      id="locate"
+    >
+      Use my location
+    </button>
+
+    <div
+      id="nearby-body"
+      class="flow"
+    ></div>
+
   </section>
 
-  <!-- ------------------------------------------------------------ settings -->
-  <section id="s-settings" class="screen" aria-label="Settings">
-    <div id="settings-body" class="flow"></div>
+  <!-- ==========================================================
+       SETTINGS
+       ========================================================== -->
+
+  <section
+    id="s-settings"
+    class="screen"
+    aria-label="Settings"
+  >
+
+    <div
+      id="settings-body"
+      class="flow"
+    ></div>
+
+  </section>
+
+  <!-- ==========================================================
+       ABOUT
+       ========================================================== -->
+
+  <section
+    id="s-about"
+    class="screen flow"
+    aria-label="About"
+  >
+
+    <div
+      id="about-body"
+      class="flow"
+    ></div>
+
   </section>
 
 </main>
 
-<nav class="tabbar" aria-label="Main">
-  <button data-screen="home" class="on" aria-current="page">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M3 10.7 12 3.2l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9.5 21v-6.5h5V21"/>
-    </svg><span class="cap">Home</span>
+<!-- ============================================================
+     BOTTOM NAVIGATION
+     ============================================================ -->
+
+<nav
+  class="tabbar"
+  aria-label="Main"
+>
+
+  <button
+    data-screen="home"
+    class="on"
+    aria-current="page"
+  >
+
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 10.7 12 3.2l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+      <path d="M9.5 21v-6.5h5V21"/>
+    </svg>
+
+    <span class="cap">
+      Home
+    </span>
+
   </button>
-  <button data-screen="track">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+  <button
+    data-screen="track"
+  >
+
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
       <path d="M20 10.5c0 5.8-8 11.5-8 11.5s-8-5.7-8-11.5a8 8 0 1 1 16 0z"/>
       <path d="M12 13a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2z"/>
-    </svg><span class="cap">Track</span>
+    </svg>
+
+    <span class="cap">
+      Track
+    </span>
+
   </button>
-  <button data-screen="routes">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+  <button
+    data-screen="routes"
+  >
+
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
       <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>
-      <path d="M6 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-    </svg><span class="cap">Routes</span>
+      <path d="M6 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+      <path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+    </svg>
+
+    <span class="cap">
+      Routes
+    </span>
+
   </button>
-  <button data-screen="nearby">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19z"/><path d="m16.2 7.8-2.1 6.4-6.4 2.1 2.1-6.4z"/>
-    </svg><span class="cap">Nearby</span>
+
+  <button
+    data-screen="nearby"
+  >
+
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19z"/>
+      <path d="m16.2 7.8-2.1 6.4-6.4 2.1 2.1-6.4z"/>
+    </svg>
+
+    <span class="cap">
+      Nearby
+    </span>
+
   </button>
+
+  <button
+    data-screen="about"
+    aria-label="About"
+  >
+
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+      />
+
+      <path d="M12 10.5v6"/>
+
+      <circle
+        cx="12"
+        cy="7.2"
+        r=".7"
+        fill="currentColor"
+        stroke="none"
+      />
+    </svg>
+
+    <span class="cap">
+      About
+    </span>
+
+  </button>
+
 </nav>
 
-<div class="sheet-backdrop" id="sheet-backdrop"></div>
-<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+<!-- ============================================================
+     SHEET
+     ============================================================ -->
+
+<div
+  class="sheet-backdrop"
+  id="sheet-backdrop"
+></div>
+
+<div
+  class="sheet"
+  id="sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="sheet-title"
+  aria-hidden="true"
+>
+
   <div class="grabber"></div>
+
   <div class="sheet-head">
-    <div class="h grow" id="sheet-title"></div>
-    <button class="iconbtn" id="sheet-close" aria-label="Close">
-      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-        stroke-linecap="round" aria-hidden="true"><path d="M18.5 5.5 5.5 18.5"/><path d="m5.5 5.5 13 13"/></svg>
+
+    <div
+      class="h grow"
+      id="sheet-title"
+    ></div>
+
+    <button
+      class="iconbtn"
+      id="sheet-close"
+      aria-label="Close"
+    >
+
+      <svg
+        class="i"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M18.5 5.5 5.5 18.5"/>
+        <path d="m5.5 5.5 13 13"/>
+      </svg>
+
     </button>
+
   </div>
-  <div class="sheet-body" id="sheet-body"></div>
+
+  <div
+    class="sheet-body"
+    id="sheet-body"
+  ></div>
+
 </div>
 
-<div class="install-banner" id="install-banner"></div>
+<div
+  class="install-banner"
+  id="install-banner"
+></div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div
+  class="toast"
+  id="toast"
+  role="status"
+  aria-live="polite"
+></div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
 
 <script src="vendor/leaflet.js?v=1.9.4"></script>
-<script type="module" src="js/app.js?v=1.46.2"></script>
+
+<script
+  type="module"
+  src="js/app.js?v=1.46.3"
+></script>
+
 </body>
 </html>
