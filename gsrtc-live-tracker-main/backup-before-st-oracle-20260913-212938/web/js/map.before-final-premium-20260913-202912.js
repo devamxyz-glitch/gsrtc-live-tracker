@@ -124,36 +124,34 @@ export function refreshTiles() {
 
 export const busIcon = (heading = null) => {
   const hasHeading = Number.isFinite(heading);
-  const safeHeading = hasHeading ? ((heading % 360) + 360) % 360 : 0;
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const direction = hasHeading ? dirs[Math.round(heading / 45) % 8] : '';
 
   return L.divIcon({
-    className: 'st-directional-bus-icon',
+    className: '',
     html: `
       <div
-        class="st-bus-marker${hasHeading ? ' has-bearing' : ''}"
-        style="--st-bearing:${safeHeading}deg"
-        aria-label="${hasHeading ? `Bus direction ${Math.round(safeHeading)} degrees` : 'Bus location'}"
+        class="bus-pin${hasHeading ? ' directional' : ''}"
+        ${hasHeading ? `style="--bus-heading:${heading}deg"` : ''}
+        aria-label="${hasHeading ? `Bus heading ${direction}, ${heading} degrees` : 'Bus location'}"
       >
-
-        <span class="st-bus-bearing">
-          <span class="st-bus-bearing-tip"></span>
-        </span>
-
-        <span class="st-bus-halo"></span>
-
-        <span class="st-bus-body">
+        ${hasHeading ? `
+          <span class="bus-heading" aria-hidden="true">
+            <span class="bus-heading-arrow"></span>
+          </span>
+          <span class="bus-direction">${direction}</span>
+        ` : ''}
+        <span class="bus-body">
           ${icon('bus', 'i i-sm')}
         </span>
-
-        <span class="st-bus-live"></span>
-
       </div>
     `,
-    iconSize: [64, 64],
-    iconAnchor: [32, 32],
-    tooltipAnchor: [0, -32],
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+    tooltipAnchor: [0, -24],
   });
 };
+
 /**
  * A stop on the route. `at` marks the one the bus is standing at right now, which is the single
  * most useful thing the map can say â€” "it is sitting at Tankara" answers a waiting rider's
@@ -395,12 +393,6 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
-
-
-
-
-
-
 
 
 

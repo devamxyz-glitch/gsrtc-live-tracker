@@ -123,35 +123,33 @@ export function refreshTiles() {
 }
 
 export const busIcon = (heading = null) => {
-  const hasHeading = Number.isFinite(heading);
-  const safeHeading = hasHeading ? ((heading % 360) + 360) % 360 : 0;
+  const hasHeading = Number.isFinite(Number(heading));
+  const safeHeading = hasHeading ? Number(heading) : 0;
 
   return L.divIcon({
-    className: 'st-directional-bus-icon',
+    className: '',
     html: `
       <div
-        class="st-bus-marker${hasHeading ? ' has-bearing' : ''}"
-        style="--st-bearing:${safeHeading}deg"
-        aria-label="${hasHeading ? `Bus direction ${Math.round(safeHeading)} degrees` : 'Bus location'}"
+        class="premium-bus-pin${hasHeading ? ' directional' : ''}"
+        style="--bus-heading:${safeHeading}deg"
+        aria-label="Live GSRTC bus"
       >
+        <span class="premium-bus-shadow"></span>
 
-        <span class="st-bus-bearing">
-          <span class="st-bus-bearing-tip"></span>
+        <span class="premium-bus-arrow" aria-hidden="true">
+          <span></span>
         </span>
 
-        <span class="st-bus-halo"></span>
-
-        <span class="st-bus-body">
-          ${icon('bus', 'i i-sm')}
+        <span class="premium-bus-core">
+          ${icon('bus', 'i')}
         </span>
 
-        <span class="st-bus-live"></span>
-
+        <span class="premium-bus-live" aria-hidden="true"></span>
       </div>
     `,
-    iconSize: [64, 64],
-    iconAnchor: [32, 32],
-    tooltipAnchor: [0, -32],
+    iconSize: [52, 52],
+    iconAnchor: [26, 26],
+    tooltipAnchor: [0, -28],
   });
 };
 /**
@@ -395,7 +393,6 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
-
 
 
 

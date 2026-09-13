@@ -124,34 +124,31 @@ export function refreshTiles() {
 
 export const busIcon = (heading = null) => {
   const hasHeading = Number.isFinite(heading);
-  const safeHeading = hasHeading ? ((heading % 360) + 360) % 360 : 0;
 
   return L.divIcon({
-    className: 'st-directional-bus-icon',
+    className: '',
     html: `
       <div
-        class="st-bus-marker${hasHeading ? ' has-bearing' : ''}"
-        style="--st-bearing:${safeHeading}deg"
-        aria-label="${hasHeading ? `Bus direction ${Math.round(safeHeading)} degrees` : 'Bus location'}"
+        class="bus-pin${hasHeading ? ' directional' : ''}"
+        ${hasHeading ? `style="--bus-heading:${heading}deg"` : ''}
+        aria-label="Live bus"
       >
-
-        <span class="st-bus-bearing">
-          <span class="st-bus-bearing-tip"></span>
-        </span>
-
-        <span class="st-bus-halo"></span>
-
-        <span class="st-bus-body">
+        ${hasHeading ? `
+          <span class="bus-bearing" aria-hidden="true">
+            <span class="bus-bearing-line"></span>
+            <span class="bus-bearing-tip"></span>
+          </span>
+        ` : ''}
+        <span class="bus-glow" aria-hidden="true"></span>
+        <span class="bus-body">
           ${icon('bus', 'i i-sm')}
         </span>
-
-        <span class="st-bus-live"></span>
-
+        <span class="bus-live" aria-hidden="true"></span>
       </div>
     `,
-    iconSize: [64, 64],
-    iconAnchor: [32, 32],
-    tooltipAnchor: [0, -32],
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
+    tooltipAnchor: [0, -28],
   });
 };
 /**
@@ -395,10 +392,6 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
-
-
-
-
 
 
 

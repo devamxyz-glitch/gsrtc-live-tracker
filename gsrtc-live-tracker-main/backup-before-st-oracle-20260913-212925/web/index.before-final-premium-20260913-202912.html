@@ -10,7 +10,7 @@
 <meta name="description" content="Track Gujarat ST (GSRTC) buses live on a map. Search any Gujarat ST bus by number plate, check live location, routes, timetables, nearby bus stations and PNR. Free GSRTC live bus tracker by ST Tracker.">
 
 <meta name="theme-color" content="#090b0f" />
-<meta name="color-scheme" content="dark" />
+<meta name="color-scheme" content="light dark" />
 
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
@@ -226,7 +226,7 @@
 </style>
 
 <link rel="stylesheet" href="vendor/leaflet.css?v=1.9.4" />
-<link rel="stylesheet" href="styles.css?v=1.50.0" />
+<link rel="stylesheet" href="styles.css?v=1.46.3" />
 
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="author" content="Devam Namera">
@@ -272,7 +272,19 @@
 }
 </script>
 
-
+<style>
+.bus-pin.directional {
+  transform: none !important;
+  transform-origin: center;
+}
+.bus-pin.directional .i {
+  transform: none !important;
+}
+.bus-heading {
+  transform: rotate(var(--bus-heading));
+  transform-origin: center;
+}
+</style>
 </head>
 
 <body>
@@ -1241,15 +1253,11 @@
 
 <script
   type="module"
-  src="js/app.js?v=1.50.0"
+  src="js/app.js?v=1.46.3"
 ></script>
 
 </body>
 </html>
-
-
-
-
 
 
 
