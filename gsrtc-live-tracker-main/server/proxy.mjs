@@ -916,6 +916,7 @@ const MIME = {
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
 };
 const COMPRESSIBLE = /^(text\/|application\/(json|manifest\+json|javascript)|image\/svg)/;
@@ -1082,6 +1083,55 @@ const STAT_EVENTS = new Set([
 
 /* ------------------------------------------------------------------ metrics helpers */
 
+const recentRequests = [];
+
+function recordRequest(endpoint) {
+  const now = Date.now();
+  recentRequests.push({ at: now, endpoint: String(endpoint || 'root') });
+  const cutoff = now - 5 * 60 * 1000;
+  while (recentRequests.length && recentRequests[0].at < cutoff) recentRequests.shift();
+}
+
+function recentRequestCount(ms) {
+  const cutoff = Date.now() - ms;
+  return recentRequests.reduce((n, r) => n + (r.at >= cutoff ? 1 : 0), 0);
+}
+const liveRequestBuffer = [];
+
+function pushLiveRequest(endpoint, method = 'GET') {
+  const now = Date.now();
+  liveRequestBuffer.push({
+    at: now,
+    endpoint: String(endpoint || 'root'),
+    method: String(method || 'GET').toUpperCase(),
+  });
+
+  const cutoff = now - 10 * 60 * 1000;
+  while (liveRequestBuffer.length && liveRequestBuffer[0].at < cutoff) {
+    liveRequestBuffer.shift();
+  }
+}
+
+function liveRequests(ms = 60000) {
+  const cutoff = Date.now() - ms;
+  return liveRequestBuffer.filter((r) => r.at >= cutoff).length;
+}
+
+function liveRecentRequests(limit = 25) {
+  const now = Date.now();
+  const cutoff = now - 5 * 60 * 1000;
+
+  return liveRequestBuffer
+    .filter((r) => r.at >= cutoff)
+    .slice(-limit)
+    .reverse()
+    .map((r) => ({
+      at: r.at,
+      method: r.method,
+      endpoint: r.endpoint,
+      agoSec: Math.max(0, Math.floor((now - r.at) / 1000)),
+    }));
+}
 const IST_HOUR = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Kolkata', hour: '2-digit', hourCycle: 'h23',
 });
@@ -1207,6 +1257,12 @@ function namedRoutes(rows) {
     const [from, to] = String(r.key).split('>');
     return { ...r, key: `${names[from] || from} to ${names[to] || to}` };
   });
+}
+
+function namedStations(rows) {
+  const ids = rows.map((r) => String(r.key));
+  const names = db.stations.names(ids);
+  return rows.map((r) => ({ ...r, key: names[r.key] || r.key }));
 }
 
 function adminStats(days = 1) {
@@ -1370,6 +1426,7 @@ const server = http.createServer(async (req, res) => {
   // "no tracking" promise true by construction rather than by remembering to be careful.
   try {
     db.metrics.bump('endpoint', segments[1] || 'root');
+    pushLiveRequest(segments[1] || 'root', req.method);
     // Only well-formed keys are counted. The bump happens before the route handler validates
     // anything, so without this a rejected request still left its junk in the table â€” the QA
     // suite's own XSS probe showed up in "most tracked buses" â€” and anyone could have padded
@@ -1515,5 +1572,8 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     }, 8000).unref();
   });
 }
+
+
+
 
 
