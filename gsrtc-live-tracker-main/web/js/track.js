@@ -1,7 +1,7 @@
-/* Track screen: one bus, live on the map.
+﻿/* Track screen: one bus, live on the map.
  *
  * The raw feed gives a dot. What a commuter standing at a stop wants is the answer to
- * "how long until it gets to me, and is it late" — so when we know the trip, this screen
+ * "how long until it gets to me, and is it late" â€” so when we know the trip, this screen
  * polls the route alongside the position and derives that (see insight.js). It also paces
  * its own polling: faster when the bus is closing on your stop, slower when it is parked.
  */
@@ -29,7 +29,7 @@ let map, marker, meMarker, trailLine;
 let plate = '';
 let trip = null;              // { tripId, status, start, route } when we came from a timetable
 let timer = null;
-let fixes = [];               // {lat,lng,at} — drives movement, speed and the trail
+let fixes = [];               // {lat,lng,at} â€” drives movement, speed and the trail
 let myPos = null;
 let controller = null;
 let wakeLock = null;
@@ -40,9 +40,9 @@ let targetIndex = -1;         // the stop the rider is waiting at
 let tripFetchedAt = 0;
 let roadIndex = null;        // the real road, once the router has supplied it
 let routeLayer = null;       // the line and its stops, held together so they clear as one
-let routeDrawnFor = null;    // 'plate:nextStopIndex' — redraw only when the bracket changes
+let routeDrawnFor = null;    // 'plate:nextStopIndex' â€” redraw only when the bracket changes
 let lastRow = null;
-let crowd = null;            // { total, occupancy, status, replacement } — what riders say
+let crowd = null;            // { total, occupancy, status, replacement } â€” what riders say
 let undoUntil = 0;           // epoch ms until which the last report can be taken back
 let occupancyOpen = false;   // the slider is revealed only on a deliberate tap
 let undoTimer = null;
@@ -58,7 +58,7 @@ export function init() {
     fetcher: (q) => api.plates(q),
     render: (r) => `<span class="glyph">${icon('bus', 'i i-sm')}</span>
       <span class="grow"><span class="t1">${esc(r.plate)}</span>
-      <span class="t2">${esc([clean(r.depot), clean(r.division)].filter(Boolean).join(' · '))}</span></span>`,
+      <span class="t2">${esc([clean(r.depot), clean(r.division)].filter(Boolean).join(' Â· '))}</span></span>`,
     onPick: (r) => start(r.plate),
   });
 
@@ -219,7 +219,7 @@ async function openTicketSheet(pnrNo) {
               <span class="badge live">${esc(row.classofService || '')}</span>
             </div>
             <div class="kv"><span class="k">${esc(t('seatNo'))}</span><span class="v" style="font-weight:700;color:var(--brand);">${esc(row.seatNo || '')}</span></div>
-            <div class="kv"><span class="k">${esc(t('fare'))}</span><span class="v">₹${esc(row.totalFare || '')}</span></div>
+            <div class="kv"><span class="k">${esc(t('fare'))}</span><span class="v">â‚¹${esc(row.totalFare || '')}</span></div>
             ${row.pickupPointName ? `<div class="kv"><span class="k">${esc(t('pickup'))}</span><span class="v">${esc(row.pickupPointName)} (${esc(row.pickupPointTime || '')})</span></div>` : ''}
             ${row.dropoffPoint ? `<div class="kv"><span class="k">${esc(t('dropoff'))}</span><span class="v">${esc(row.dropoffPoint)}</span></div>` : ''}
             ${row.dateofJourney ? `<div class="kv"><span class="k">${esc(t('date'))}</span><span class="v">${esc(row.dateofJourney)} ${esc(row.dateTime || '')}</span></div>` : ''}
@@ -302,7 +302,7 @@ export function start(nextPlate, context = null) {
     if (routeLayer && map) map.removeLayer(routeLayer);
     routeLayer = null; routeDrawnFor = null;
     // And re-arm auto-follow. `_stUserMoved` latches on the first drag so that panning around
-    // one bus is not fought by the next poll — but it was never cleared when the bus changed,
+    // one bus is not fought by the next poll â€” but it was never cleared when the bus changed,
     // so a single drag left every later bus stranded off-screen until the recentre button was
     // pressed. Choosing a new bus is a fresh intent to watch it.
     if (map) map._stUserMoved = false;
@@ -426,7 +426,7 @@ function adoptServerFixes(serverFixes) {
  * Fetches the route's road line once, and keeps it.
  *
  * With it, "how far off the route is this bus" is measured against the actual road instead of
- * the chord between two sparse stops — where a bus on a perfectly ordinary detour can read as
+ * the chord between two sparse stops â€” where a bus on a perfectly ordinary detour can read as
  * fifty kilometres off course. That is why the straight-line tolerance had to be eight
  * kilometres, and why it can now be one and a half.
  */
@@ -497,7 +497,7 @@ function currentEta() {
 /** Station names carry a parenthesised city that adds nothing inside a narrow metric cell. */
 const shorten = (name, max = 26) => {
   const trimmed = name.replace(/\s*\([^)]*\)\s*$/, '').trim() || name;
-  return trimmed.length > max ? `${trimmed.slice(0, max - 1).trimEnd()}…` : trimmed;
+  return trimmed.length > max ? `${trimmed.slice(0, max - 1).trimEnd()}â€¦` : trimmed;
 };
 
 const formatMinutes = (m) => (m <= 0 ? t('arrivingNow')
@@ -510,7 +510,7 @@ const formatMinutes = (m) => (m <= 0 ? t('arrivingNow')
  * The route on the map, and the two place names that answer "where is it".
  *
  * Raster tiles carry almost no village names at tracking zoom in rural Gujarat, so the bus can
- * sit on an empty beige field with nothing around it to read. No basemap fixes that — the
+ * sit on an empty beige field with nothing around it to read. No basemap fixes that â€” the
  * labels are not in the tiles to begin with. But the stops of the bus's own route are exactly
  * the names a rider wants, and the app already has them with coordinates.
  *
@@ -536,7 +536,7 @@ function drawRoute() {
   if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
   if (!map) return;
   if (!stops.length) {
-    // No route means nothing to defer to — the stand layer is the only thing naming places.
+    // No route means nothing to defer to â€” the stand layer is the only thing naming places.
     setRouteStops(map, []);
     return;
   }
@@ -591,7 +591,7 @@ function drawRoute() {
   routeDrawnFor = `${plate}:${nextIdx}`;
 }
 
-/** Redraws only when the bus has actually moved between stops — not on every poll. */
+/** Redraws only when the bus has actually moved between stops â€” not on every poll. */
 function maybeDrawRoute() {
   if (!map || !stops.length) return;
   const loc = routeFix();
@@ -604,7 +604,7 @@ function maybeDrawRoute() {
  *
  * The plate alone tells a rider nothing about *where* the dot is, and the tiles rarely name the
  * village it is passing. The operator's own NextLocation does, and it is present on every
- * tracked bus — including a plate typed straight into the box, which never loads a stop list
+ * tracked bus â€” including a plate typed straight into the box, which never loads a stop list
  * and so gets no stop pins. This is the one label that is always available.
  */
 function busLabel(row) {
@@ -613,21 +613,132 @@ function busLabel(row) {
   const here = stopAtNow();
   if (here) {
     const name = localName(clean(here.name), clean(here.nameGu));
-    if (name) return `${plate} · ${t('atStop', { stop: shorten(name, 14) })}`;
+    if (name) return `${plate} Â· ${t('atStop', { stop: shorten(name, 14) })}`;
   }
   const next = clean(row?.NextLocation);
-  return next ? `${plate} → ${shorten(next, 16)}` : plate;
+  return next ? `${plate} â†’ ${shorten(next, 16)}` : plate;
 }
 
 // `row` is passed in rather than read from `lastRow`: handleRow draws before it calls render,
-// and render is what assigns lastRow — so reading it here would always label the bus with the
+// and render is what assigns lastRow â€” so reading it here would always label the bus with the
 // previous poll's next stop, and leave the very first draw with no name at all.
+function bearingDegrees(a, b) {
+  if (!a || !b) return null;
+
+  const lat1 = Number(a.lat) * Math.PI / 180;
+  const lat2 = Number(b.lat) * Math.PI / 180;
+  const dLng = (Number(b.lng) - Number(a.lng)) * Math.PI / 180;
+
+  if (![lat1, lat2, dLng].every(Number.isFinite)) return null;
+
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+
+  const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  return Number.isFinite(deg) ? Math.round(deg) : null;
+}
+
+function directionLabel(deg) {
+  if (!Number.isFinite(deg)) return '';
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+function trackerIntel(row, pos) {
+  const last = fixes[fixes.length - 1];
+  const prev = fixes[fixes.length - 2];
+  const speed = insight.speedFrom(fixes);
+  const movement = insight.movementFrom(fixes);
+  const fresh = insight.freshness(last?.at);
+
+  const heading = bearingDegrees(prev, last);
+  const headingText = directionLabel(heading);
+
+  const route = clean(row?.RouteName);
+  const next = clean(row?.NextLocation);
+  const lastStop = clean(row?.LastBusStation);
+
+  const travelled = fixes.length > 1
+    ? fixes.slice(1).reduce((sum, f, i) =>
+      sum + haversineKm(fixes[i], f), 0)
+    : 0;
+
+  const freshnessText =
+    fresh === 'live' ? 'Live GPS' :
+    fresh === 'stale' ? 'GPS slightly delayed' :
+    fresh === 'dead' ? 'GPS stale' :
+    fresh === 'none' ? 'No recent GPS' :
+    'Updating';
+
+  return `
+    <section class="card pad flow" style="margin-top:var(--space-2);">
+      <div class="sec-title" style="margin:0;">
+        Live intelligence
+      </div>
+
+      <div class="grid-2" style="gap:8px;">
+        ${route ? `<div class="kv"><span class="k">Route</span><span class="v">${esc(route)}</span></div>` : ''}
+        ${next ? `<div class="kv"><span class="k">Next stop</span><span class="v">${esc(next)}</span></div>` : ''}
+        ${lastStop ? `<div class="kv"><span class="k">Last stop</span><span class="v">${esc(lastStop)}</span></div>` : ''}
+
+        <div class="kv">
+          <span class="k">Movement</span>
+          <span class="v">${esc(movement.state)}</span>
+        </div>
+
+        <div class="kv">
+          <span class="k">Speed</span>
+          <span class="v">${
+            speed.kmh != null ? `${num(speed.kmh)} km/h` : 'Measuring'
+          }</span>
+        </div>
+
+        ${headingText ? `
+          <div class="kv">
+            <span class="k">Direction</span>
+            <span class="v">${esc(headingText)} · ${heading}°</span>
+          </div>
+        ` : ''}
+
+        <div class="kv">
+          <span class="k">GPS</span>
+          <span class="v">${esc(freshnessText)}</span>
+        </div>
+
+        ${last?.at ? `
+          <div class="kv">
+            <span class="k">Last update</span>
+            <span class="v">${esc(since(last.at))}</span>
+          </div>
+        ` : ''}
+
+        ${travelled > 0 ? `
+          <div class="kv">
+            <span class="k">Recent movement</span>
+            <span class="v">${esc(num(travelled))} km</span>
+          </div>
+        ` : ''}
+      </div>
+    </section>
+  `;
+}
 function drawBus(pos, row) {
   if (!marker) {
-    marker = L.marker([pos.lat, pos.lng], { icon: busIcon(), zIndexOffset: 500 }).addTo(map);
+    const heading = bearingDegrees(fixes[fixes.length - 2], fixes[fixes.length - 1]);
+    marker = L.marker([pos.lat, pos.lng], {
+      icon: busIcon(heading),
+      zIndexOffset: 500,
+    }).addTo(map);
     tooltip(marker, busLabel(row));
     map.setView([pos.lat, pos.lng], 14);
   } else {
+    const heading = bearingDegrees(
+      fixes[fixes.length - 2],
+      fixes[fixes.length - 1],
+    );
+    marker.setIcon(busIcon(heading));
     marker.setTooltipContent(esc(busLabel(row)));
     glideTo(marker, L.latLng(pos.lat, pos.lng));
   }
@@ -647,7 +758,7 @@ function drawBus(pos, row) {
  * The map's two buttons, drawn for the state the map is actually in.
  *
  * "Recentre on the bus" was rendered once at start-up and never again, so it sat there before a
- * plate had been entered, and while a bus was parked or its trip had finished — every one of
+ * plate had been entered, and while a bus was parked or its trip had finished â€” every one of
  * those a guaranteed no-op, because `recentre()` returns immediately without a fix. A control
  * that cannot do anything should not be on screen; a rider pressing it twice and getting
  * nothing has no way to tell a dead button from a broken app.
@@ -682,7 +793,7 @@ async function showMe() {
       fit(map, [[last.lat, last.lng], [myPos.lat, myPos.lng]]);
     } else {
       // With no bus to frame against, centre on the rider. Without this the button drew a
-      // marker that was already on screen and moved nothing — pressing it did visibly nothing,
+      // marker that was already on screen and moved nothing â€” pressing it did visibly nothing,
       // which is indistinguishable from a broken control.
       map._stUserMoved = true;   // they asked to look here; do not drag them back to the bus
       map.setView([myPos.lat, myPos.lng], Math.max(map.getZoom(), 14), { animate: true });
@@ -710,12 +821,12 @@ const MY_LOCATION_MAX_AGE_MS = 2 * 60 * 1000;
  * Fills in "from you" without waiting to be asked.
  *
  * `myPos` used to be set only by the locate button, so the headline distance sat on "measuring"
- * indefinitely even when location permission had already been granted — the app had everything
+ * indefinitely even when location permission had already been granted â€” the app had everything
  * it needed and was simply waiting for a tap that says nothing it did not already know.
  *
  * Two rules hold it in place. It never prompts: it acts only when permission is already
  * granted, or when a stored fix proves it was granted before, which is the only signal Safari
- * gives (it cannot report the state without asking). And it never moves the map — recentring
+ * gives (it cannot report the state without asking). And it never moves the map â€” recentring
  * belongs to the locate button, and doing it on every poll would fight the follow on the bus.
  */
 async function ensureMyLocation() {
@@ -755,7 +866,7 @@ function renderChips() {
   ];
   // Recents get a dismiss here too. Home has had one since the list started filling itself in
   // without being asked, and the same row on this screen offering no way out was simply an
-  // oversight. A saved bus keeps no dismiss — that one was deliberate, and the star removes it.
+  // oversight. A saved bus keeps no dismiss â€” that one was deliberate, and the star removes it.
   $('#track-chips').innerHTML = items.map((i) => (i.saved
     ? `<button class="chip${i.plate === plate ? ' on' : ''}" data-plate="${esc(i.plate)}">${
       iconFilled('star', 'i i-sm')}<span class="num">${esc(i.plate)}</span></button>`
@@ -888,7 +999,7 @@ function render(row, pos) {
 
 /**
  * Crowd reports. The operator's feed cannot tell you the bus is full, and it cannot tell you
- * the bus never turned up — a dead GPS looks exactly like a bus that is merely late. Riders
+ * the bus never turned up â€” a dead GPS looks exactly like a bus that is merely late. Riders
  * standing at the stop know both.
  */
 const SEATS_FREE_MAX = 40;
@@ -938,7 +1049,7 @@ const peopleSaying = (n) => (n === 1 ? t('reportedBy', { n }) : t('reportedByPlu
  * Repaints the gauge to a dragged value without re-rendering the card.
  *
  * Re-rendering mid-drag would replace the very input the finger is holding, and the browser
- * would drop the gesture — so this touches only the class list, the caption, and one variable.
+ * would drop the gesture â€” so this touches only the class list, the caption, and one variable.
  */
 function paintOccupancy(count) {
   const occ = $('#occ');
@@ -978,7 +1089,7 @@ function crowdBlock() {
         ${icon('swap', 'i i-sm')}
         <div class="cn-body">
           <span class="cn-lead">${esc(t('replacedByLead'))}${
-  crowd?.disputed ? ` · ${esc(t('disputedNote'))}` : ''}</span>
+  crowd?.disputed ? ` Â· ${esc(t('disputedNote'))}` : ''}</span>
           <span class="cn-plate num">${esc(replacement.plate)}</span>
           <button class="btn sm" data-track-plate="${esc(replacement.plate)}">${
   esc(t('replacedTrack'))}${icon('right', 'i i-sm')}</button>
@@ -1035,13 +1146,13 @@ function crowdBlock() {
  * The resting state: what riders have said, and a button to say something yourself.
  *
  * The slider used to sit here permanently and was being dragged by accident while scrolling
- * the card — 32 undos against 156 reports in one day, a fifth of them taken straight back. A
+ * the card â€” 32 undos against 156 reports in one day, a fifth of them taken straight back. A
  * report should be a decision, not a side effect of scrolling past one.
  */
 function closedScale(value, reported, samples) {
   const known = reported != null;
   // What this service is usually like at this hour, which is the more useful number when
-  // nobody has reported *this* bus yet — and the one that lets someone pick a later service.
+  // nobody has reported *this* bus yet â€” and the one that lets someone pick a later service.
   const usually = crowd?.usually;
   const typical = usually
     ? `<span class="occ-usually">${icon('clock', 'i i-sm')}${esc(t('usuallyAt', {
@@ -1062,8 +1173,8 @@ function closedScale(value, reported, samples) {
 
 /**
  * One signed slider: seats going spare to the left, people standing to the right, and "every
- * seat taken, nobody up yet" in the middle. One axis because it is one quantity — a bus does
- * not have spare seats and standing passengers at once — so it can be dragged across the whole
+ * seat taken, nobody up yet" in the middle. One axis because it is one quantity â€” a bus does
+ * not have spare seats and standing passengers at once â€” so it can be dragged across the whole
  * range without first deciding which of two questions is being answered.
  */
 function openScale(value, reported, samples) {
@@ -1098,7 +1209,7 @@ function openScale(value, reported, samples) {
 /**
  * Asks which bus actually turned up.
  *
- * A replacement is the one report that is useless without a second piece of information — "a
+ * A replacement is the one report that is useless without a second piece of information â€” "a
  * different bus came" tells the next rider nothing they can act on, while a plate sends them
  * to the bus that is actually running.
  */
@@ -1278,7 +1389,7 @@ function onStatusClick(e) {
 
 async function share() {
   const url = `${location.origin}${location.pathname}?plate=${encodeURIComponent(plate)}`;
-  const data = { title: `${t('appName')} · ${plate}`, text: `${plate} — ${t('tagline')}`, url };
+  const data = { title: `${t('appName')} Â· ${plate}`, text: `${plate} â€” ${t('tagline')}`, url };
   try {
     if (navigator.share) await navigator.share(data);
     else { await navigator.clipboard.writeText(url); toast(t('copyLink'), 'copy'); }
@@ -1346,7 +1457,7 @@ export function setStopAlert({ lat, lng, label, radiusKm = 1, index = -1 }) {
  *
  * A push subscription is the real thing: the server checks it against positions it is already
  * polling, so it fires with the phone in a pocket. The in-page watcher is kept as the fallback
- * for browsers without push, a denied permission, or iOS before the app is installed — and the
+ * for browsers without push, a denied permission, or iOS before the app is installed â€” and the
  * rider is told plainly which of the two they got, because the difference matters.
  */
 async function armAlert({ lat, lng, label, radiusKm = 1 }) {
@@ -1369,3 +1480,7 @@ async function armAlert({ lat, lng, label, radiusKm = 1 }) {
 export function currentPlate() { return plate; }
 export function currentTrip() { return trip; }
 export function targetStopIndex() { return targetIndex; }
+
+
+
+

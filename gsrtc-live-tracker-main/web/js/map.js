@@ -1,4 +1,4 @@
-/* Thin Leaflet wrapper. Keeps tile choice in step with the theme and animates the bus
+﻿/* Thin Leaflet wrapper. Keeps tile choice in step with the theme and animates the bus
    between two fixes instead of teleporting it, which reads far better at 20s polling. */
 
 import { icon } from './icons.js';
@@ -17,7 +17,7 @@ import * as store from './store.js';
  *     that draws from it; the polite and correct route to OSM data is a provider who serves it
  *     for that purpose, which is what CARTO is doing below.
  *   - Google's tiles are not here either, and must never be. Google's terms only permit their
- *     map data through their own APIs — pulling their tile URLs into Leaflet is a licence
+ *     map data through their own APIs â€” pulling their tile URLs into Leaflet is a licence
  *     breach, not a shortcut. Real Google support is a second rendering engine; see GOOGLE.
  *
  * `dark` is optional: satellite imagery looks the same at night, so it simply has no variant.
@@ -40,11 +40,11 @@ export const MAP_STYLES = {
     maxZoom: 19,
   },
   detailed: {
-    // Voyager keeps road classes, place names and landmarks that the minimal style drops —
+    // Voyager keeps road classes, place names and landmarks that the minimal style drops â€”
     // the closest free thing to the density people expect from Google.
     //
     // No `dark` variant on purpose. Voyager has no dark counterpart, and the obvious
-    // substitute is the minimal dark style — which is exactly what `standard` already is, so
+    // substitute is the minimal dark style â€” which is exactly what `standard` already is, so
     // picking "Detailed" at night would silently hand back the Standard map and look like the
     // setting was ignored. Someone who chose Detailed wants the extra information; showing it
     // is more useful than matching the UI.
@@ -94,7 +94,7 @@ function paint(map) {
   }).addTo(map);
 
   // Labels must sit above the basemap but below every marker, which is what Leaflet's shadow
-  // pane is for — the tile pane would put them underneath.
+  // pane is for â€” the tile pane would put them underneath.
   for (const url of style.overlays || []) {
     map._stLabels.push(
       L.tileLayer(url, { maxZoom: style.maxZoom, pane: 'shadowPane' }).addTo(map),
@@ -122,16 +122,19 @@ export function refreshTiles() {
   maps.forEach(paint);
 }
 
-export const busIcon = (label = '') => L.divIcon({
+export const busIcon = (heading = null) => L.divIcon({
   className: '',
-  html: `<div class="bus-pin">${icon('bus', 'i i-sm')}</div>`,
-  iconSize: [34, 34], iconAnchor: [17, 17], tooltipAnchor: [0, -18],
-  ...(label ? {} : {}),
+  html: `<div class="bus-pin${Number.isFinite(heading) ? ' directional' : ''}"${
+    Number.isFinite(heading) ? ` style="--bus-heading:${heading}deg"` : ''
+  }>${icon('bus', 'i i-sm')}</div>`,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+  tooltipAnchor: [0, -18],
 });
 
 /**
  * A stop on the route. `at` marks the one the bus is standing at right now, which is the single
- * most useful thing the map can say — "it is sitting at Tankara" answers a waiting rider's
+ * most useful thing the map can say â€” "it is sitting at Tankara" answers a waiting rider's
  * question in a way a moving dot between two villages never does.
  */
 export const stopIcon = (done, { at = false } = {}) => L.divIcon({
@@ -155,7 +158,7 @@ export const meIcon = () => L.divIcon({
  * responses the app already makes, so this costs the operator nothing.
  *
  * Only from zoom 11 in. Further out the stands pile into an unreadable smear, and the viewport
- * covers half the state — which is a large query to answer for something nobody can read.
+ * covers half the state â€” which is a large query to answer for something nobody can read.
  */
 const STANDS_MIN_ZOOM = 11;
 
@@ -163,11 +166,11 @@ const STANDS_MIN_ZOOM = 11;
  * How close counts as "the bus is at this stand".
  *
  * Generous on purpose, and widened once already. The operator's fixes drift by a couple of
- * hundred metres, stands sit off the carriageway, and a bus pulling in stops short of the pin —
+ * hundred metres, stands sit off the carriageway, and a bus pulling in stops short of the pin â€”
  * so a tight radius blinks the highlight on and off while the rider watches.
  *
- * The case that set this figure: the operator lists one place twice under different names —
- * "Madhapar( Rajkot)" and "Madhapar(RJT)" — a few hundred metres apart. At 400m only one of the
+ * The case that set this figure: the operator lists one place twice under different names â€”
+ * "Madhapar( Rajkot)" and "Madhapar(RJT)" â€” a few hundred metres apart. At 400m only one of the
  * pair lit up, which reads as the app picking a favourite between two identical labels rather
  * than as a radius. Marking every stand the bus is genuinely beside is the honest answer.
  */
@@ -176,7 +179,7 @@ const AT_STAND_M = 700;
 /**
  * How close a stand has to be to a route stop to count as the same place.
  *
- * The two come from different sources — the route's stop list and the gazetteer — so the same
+ * The two come from different sources â€” the route's stop list and the gazetteer â€” so the same
  * bus station lands at slightly different coordinates in each.
  */
 const SAME_PLACE_M = 250;
@@ -215,11 +218,11 @@ export function showBusStands(map) {
       for (const stop of stops || []) {
         if (drawn.has(stop.id)) continue;
         // The route's own stops are drawn by the track screen, with context this layer does not
-        // have — behind the bus, ahead of it, at it. Adding a second marker for the same place
+        // have â€” behind the bus, ahead of it, at it. Adding a second marker for the same place
         // put "Rajkot" on screen four times over.
         if (onRoute(L.latLng(stop.lat, stop.lng))) continue;
         const marker = L.marker([stop.lat, stop.lng], { icon: standIcon(), interactive: true })
-          // The app's own tooltip style, not Leaflet's default white box — and the quietest
+          // The app's own tooltip style, not Leaflet's default white box â€” and the quietest
           // variant of it, because there are hundreds of these and they are context for the
           // bus rather than the subject of the screen.
           .bindTooltip(esc(localName(stop.name, stop.nameGu)), {
@@ -232,7 +235,7 @@ export function showBusStands(map) {
       }
     } catch {
       // The stands are context, not the point of the screen. A failed fetch leaves the map alone
-      // — and forgets the area, so the next move tries again rather than assuming it has them.
+      // â€” and forgets the area, so the next move tries again rather than assuming it has them.
       covered = null;
     } finally {
       inFlight = false;
@@ -246,7 +249,7 @@ export function showBusStands(map) {
    * Drops stands the route turned out to cover.
    *
    * The stop list arrives after the stands do, so the overlap can only be resolved once it is
-   * known — otherwise the duplicates simply stay on screen for the rest of the session.
+   * known â€” otherwise the duplicates simply stay on screen for the rest of the session.
    */
   map._stStandsPrune = () => {
     drawn.forEach((marker, id) => {
@@ -260,14 +263,14 @@ export function showBusStands(map) {
   const applyNear = (marker) => {
     const d = busAt ? map.distance(marker.getLatLng(), busAt) : Infinity;
     // Sitting on top of the bus, the stand's own label has nowhere to go that is not already
-    // occupied — below its pin lands exactly where the bus's label is, because the two markers
+    // occupied â€” below its pin lands exactly where the bus's label is, because the two markers
     // are the same point. The bus label already names the stop it is at, so the stand keeps its
     // highlight and gives up the words.
     const onTopOfBus = d <= TOO_CLOSE_TO_LABEL_M;
     const near = d <= AT_STAND_M;
     const el = marker.getElement()?.querySelector('.stand-pin');
     if (el) el.classList.toggle('near', !!near);
-    // The name is worth saying out loud at the moment the bus reaches it — that is the whole
+    // The name is worth saying out loud at the moment the bus reaches it â€” that is the whole
     // question a rider at that stop is asking. Elsewhere it stays a dot until tapped.
     const wantLabel = near && !onTopOfBus;
     const tip = marker.getTooltip();
@@ -283,7 +286,7 @@ export function showBusStands(map) {
         permanent: wantLabel,
         // Below the pin while the bus is here, above it otherwise. The bus carries its own
         // label directly above its marker, and at eight metres apart the two land on the same
-        // pixel — the stand's name was rendering straight through "plate → next stop".
+        // pixel â€” the stand's name was rendering straight through "plate â†’ next stop".
         direction: wantLabel ? 'bottom' : 'top',
         offset: wantLabel ? [0, 6] : [0, -3],
         className: `map-tip stand-tip${near ? ' near' : ''}`,
@@ -305,7 +308,7 @@ export function showBusStands(map) {
 /**
  * Tells the stand layer where the bus is, so the one it is passing can say so.
  *
- * Safe to call before the layer exists or on a map that never asked for stands — the track
+ * Safe to call before the layer exists or on a map that never asked for stands â€” the track
  * screen calls it on every position update and should not have to know either.
  */
 export function markStandsNearBus(map, latlng) {
@@ -370,3 +373,5 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
+
+

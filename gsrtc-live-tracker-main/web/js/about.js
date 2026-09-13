@@ -1,4 +1,4 @@
-import { icon } from './icons.js';
+﻿import { icon } from './icons.js';
 
 let rendered = false;
 
@@ -109,6 +109,28 @@ function render() {
       </div>
     </section>
 
+    <section class="about-card">
+      <div class="about-eyebrow">SERVICE STATUS</div>
+      <h3>We are still improving ST Tracker.</h3>
+      <p>
+        Some live information depends on the data currently available from external GSRTC
+        systems. We continuously monitor the service and improve tracking, routes, ETA and
+        reliability as new information becomes available.
+      </p>
+      <p>
+        If something looks incorrect, a bus is missing, a route is not loading, or you have
+        any question or suggestion, please contact us directly on WhatsApp. Every useful
+        report helps us improve the experience for other passengers too.
+      </p>
+      <div class="about-cta-actions">
+        <a class="btn"
+           href="https://wa.me/918780692285"
+           target="_blank"
+           rel="noopener">
+          ${icon('message', 'i i-sm')} WhatsApp support
+        </a>
+      </div>
+    </section>
     <section class="about-card about-cta-card">
       <div class="about-eyebrow">BUILD WITH DEVAM</div>
 
@@ -144,7 +166,7 @@ function render() {
       <div class="about-quote">
         <span>Available for</span>
         <strong>
-          Mobile Apps · Websites · Dashboards · Custom Software · International Projects
+          Mobile Apps Â· Websites Â· Dashboards Â· Custom Software Â· International Projects
         </strong>
       </div>
     </section>

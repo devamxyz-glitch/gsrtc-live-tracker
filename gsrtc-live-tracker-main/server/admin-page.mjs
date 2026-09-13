@@ -1,605 +1,720 @@
-/**
- * The dashboard's markup.
- *
- * Kept as a self-contained page rather than a screen inside the PWA: it is the owner's tool,
- * not a rider's, and it has no business being precached by the service worker, translated, or
- * shipped to eight thousand phones that will never open it.
- *
- * Everything it renders is an aggregate. There is deliberately no "users" panel — the app
- * stores nothing per person, so there is no such table to read, and the point of building it
- * this way is that adding one would be a visible decision rather than a quiet drift.
- */
+﻿import { randomUUID } from 'node:crypto';
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => (
-  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
+const fmt = (v) => Number(v || 0).toLocaleString('en-IN');
+
+const OCCUPANCY = {
+  1: 'Many seats',
+  2: 'Some seats',
+  3: 'Standing',
+  4: 'Crowded',
+  5: 'Cannot board',
+};
 
 const SHELL_CSS = `
-  :root {
-    --bg: #0b1220; --panel: #131d2f; --panel-2: #182338; --line: #253552;
-    --ink: #eaf0fb; --ink-2: #93a3bf; --ink-3: #6b7b98;
-    --brand: #5b8def; --brand-2: #8ab0f7; --good: #34c98a; --warn: #f0a340; --bad: #ef6a5e;
-    color-scheme: dark;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* Sidebar layout. Splitting by the question being asked means each screen holds one idea,
-     rather than twenty panels competing on a single scroll. */
-  .app { display: flex; min-height: 100vh; }
-  .side {
-    width: 232px; flex: none; position: sticky; top: 0; align-self: flex-start; height: 100vh;
-    display: flex; flex-direction: column;
-    padding: 22px 14px; border-right: 1px solid var(--line); background: var(--panel);
-  }
-  .brand {
-    font-weight: 700; font-size: 16px; padding: 0 10px 18px; letter-spacing: -.3px;
-    display: flex; align-items: center; gap: 9px;
-  }
-  .brand::before {
-    content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--good);
-    box-shadow: 0 0 0 4px rgba(52, 201, 138, .16);
-  }
-  #nav { display: flex; flex-direction: column; gap: 3px; }
-  #nav button {
-    text-align: left; border: 0; background: none; color: var(--ink-2); cursor: pointer;
-    padding: 10px 12px; border-radius: 9px; font: inherit; font-size: 14px; width: 100%;
-    transition: background .12s, color .12s;
-  }
-  #nav button:hover { background: var(--panel-2); color: var(--ink); }
-  #nav button.on { background: var(--brand); color: #08111f; font-weight: 650; }
-  .side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-  .signout {
-    width: 100%; padding: 10px; border-radius: 9px; cursor: pointer; font: inherit; font-size: 13.5px;
-    border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-2);
-  }
-  .signout:hover { color: var(--ink); }
-
-  .main { flex: 1; min-width: 0; padding: 26px 28px 80px; }
-  header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
-  header h1 { font-size: 24px; margin: 0; letter-spacing: -.5px; font-weight: 700; }
-  .muted { color: var(--ink-2); font-size: 13px; }
-
-  .range { display: flex; gap: 3px; background: var(--panel-2); padding: 4px; border-radius: 10px; }
-  .range button {
-    flex: 1; padding: 7px 4px; font: inherit; font-size: 12.5px; cursor: pointer;
-    border: 0; background: none; color: var(--ink-2); border-radius: 7px;
-  }
-  .range button.on { background: var(--brand); color: #08111f; font-weight: 700; }
-
-  /* Wider minimum than before: a panel narrower than about 340px cannot hold a label, a bar and
-     a number on one line without truncating something. */
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
-  .grid.one { grid-template-columns: 1fr; margin-top: 16px; }
-  .card {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px;
-  }
-  .card h2 {
-    font-size: 11.5px; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--ink-2); margin: 0 0 14px; font-weight: 700;
-  }
-  .big {
-    font-size: 40px; font-weight: 700; letter-spacing: -1.4px; line-height: 1.05;
-    font-variant-numeric: tabular-nums; margin-bottom: 4px;
-  }
-
-  .kv { display: flex; justify-content: space-between; gap: 14px; padding: 8px 0; font-size: 14px; }
-  .kv + .kv { border-top: 1px solid var(--panel-2); }
-  .kv span { color: var(--ink-2); }
-  .kv b { font-weight: 650; font-variant-numeric: tabular-nums; }
-
-  .row { display: flex; align-items: center; gap: 12px; padding: 7px 0; font-size: 13.5px; }
-  .row + .row { border-top: 1px solid var(--panel-2); }
-  .row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bar { height: 8px; border-radius: 4px; background: var(--brand); min-width: 4px; flex: none; }
-  .n { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; font-weight: 650; }
-  .empty { color: var(--ink-3); font-size: 13.5px; padding: 18px 0; text-align: center; }
-  .pill { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 650; }
-  .pill.good { background: #143a2b; color: var(--good); }
-  .pill.bad { background: #3a1a17; color: var(--bad); }
-
-  /* Charts. Given real height and a labelled axis — a 40px sparkline with no scale is
-     decoration, not a reading. */
-  .chart-wrap { margin-bottom: 6px; }
-  .chart-head {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-size: 12px; color: var(--ink-2); margin-bottom: 6px;
-  }
-  .chart-head b { color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
-  .chart { width: 100%; height: 120px; display: block; overflow: visible; }
-  .chart .grid-line { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-  .chart .area { fill: url(#g1); }
-  .chart .line { fill: none; stroke: var(--brand); stroke-width: 2; vector-effect: non-scaling-stroke;
-    stroke-linejoin: round; stroke-linecap: round; }
-  .chart .dot { fill: var(--brand); }
-  .chart-axis {
-    display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3);
-    margin: 6px 0 16px;
-  }
-
-  .hours { display: flex; align-items: flex-end; gap: 3px; height: 110px; }
-  .hours i {
-    flex: 1; background: var(--panel-2); border-radius: 3px 3px 0 0; min-height: 3px;
-    transition: background .12s;
-  }
-  .hours i.peak { background: var(--brand); }
-  .hours i.busy { background: #3a5c9e; }
-  .hours-axis {
-    display: flex; justify-content: space-between; margin-top: 7px;
-    font-size: 11px; color: var(--ink-3);
-  }
-
-  /* Funnels */
-  .step { margin-bottom: 14px; }
-  .step-top { display: flex; justify-content: space-between; font-size: 13.5px; }
-  .step-top b { font-variant-numeric: tabular-nums; }
-  .step-bar { height: 9px; border-radius: 5px; background: var(--panel-2); margin-top: 6px; overflow: hidden; }
-  .step-bar i { display: block; height: 100%; background: var(--brand); border-radius: 5px; }
-  .step-drop { font-size: 11.5px; color: var(--bad); margin-top: 4px; }
-
-  /* Tables */
-  .filter {
-    width: 100%; padding: 11px 14px; margin-bottom: 12px; font: inherit; font-size: 13.5px;
-    border-radius: 10px; border: 1px solid var(--line); background: #0e1728; color: var(--ink);
-  }
-  .filter:focus { outline: none; border-color: var(--brand); }
-  .tbl { max-height: 520px; overflow: auto; }
-  .tr {
-    display: grid; gap: 14px; align-items: center;
-    padding: 9px 4px; border-bottom: 1px solid var(--panel-2); font-size: 13.5px;
-  }
-  .tr.th {
-    color: var(--ink-2); font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
-    position: sticky; top: 0; background: var(--panel); z-index: 1; font-weight: 700;
-  }
-  .tr.th span { cursor: pointer; user-select: none; }
-  .tr.th span:hover { color: var(--ink); }
-  .tr span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tr:not(.th):hover { background: var(--panel-2); }
-
-  /* Journeys */
-  .jrn { padding: 14px 0; border-top: 1px solid var(--panel-2); }
-  .jrn:first-of-type { border-top: 0; }
-  .jrn-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
-  .tag {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px;
-    background: var(--panel-2); padding: 3px 9px; border-radius: 7px; color: var(--brand-2);
-  }
-  .hops { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-  .hop {
-    font-size: 12px; background: var(--panel-2); border: 1px solid var(--line);
-    padding: 3px 10px; border-radius: 999px; color: var(--ink-2); white-space: nowrap;
-  }
-  .arr { color: var(--ink-3); }
-
-  .note {
-    margin-top: 24px; padding: 16px 18px; border-radius: 14px;
-    background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); font-size: 13px;
-  }
-
-  @media (max-width: 860px) {
-    .app { flex-direction: column; }
-    .side { width: auto; height: auto; position: static; border-right: 0;
-      border-bottom: 1px solid var(--line); }
-    #nav { flex-direction: row; flex-wrap: wrap; }
-    #nav button { width: auto; }
-    .main { padding: 20px 16px 60px; }
-  }
+:root{
+  color-scheme:dark;
+  --bg:#070707;
+  --panel:#0d0d0e;
+  --panel2:#111112;
+  --line:#242427;
+  --muted:#85858c;
+  --text:#f5f5f7;
+  --soft:#c7c7cc;
+  --gold:#d6ae4d;
+  --gold2:#f1d57c;
+  --green:#5ad18b;
+  --red:#ff6b6b;
+  --blue:#73a7ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{border-right:1px solid var(--line);background:#090909;padding:22px 14px;position:sticky;top:0;height:100vh}
+.brand{padding:8px 10px 26px;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.brand span{display:block;color:var(--gold);font-size:11px;margin-top:5px;letter-spacing:.08em;text-transform:uppercase}
+.nav{display:grid;gap:4px}
+.nav button{
+  border:0;background:transparent;color:#9d9da4;text-align:left;padding:10px 12px;border-radius:9px
+}
+.nav button:hover{background:#121214;color:#fff}
+.nav button.on{background:#151514;color:#fff;box-shadow:inset 2px 0 var(--gold)}
+.side-bottom{position:absolute;left:14px;right:14px;bottom:18px}
+.owner{border-top:1px solid var(--line);padding:14px 10px 0;color:#777;font-size:11px;line-height:1.55}
+.owner strong{display:block;color:#d6d6d9;font-size:12px}
+.main{min-width:0;padding:28px 32px 40px}
+.top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:24px
+}
+.kicker{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+h1{margin:4px 0 6px;font-size:28px;letter-spacing:-.04em}
+.subtitle{color:var(--muted);font-size:13px}
+.live{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid #304b38;background:#0d1711;
+  color:#8ee0ad;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 14px #5ad18b88}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.toolbar button{
+  background:#0d0d0f;color:#9a9aa1;border:1px solid var(--line);padding:7px 11px;border-radius:8px
+}
+.toolbar button.on,.toolbar button:hover{color:#fff;border-color:#46464a;background:#151517}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.card{
+  grid-column:span 4;background:linear-gradient(180deg,#111112,#0c0c0d);
+  border:1px solid var(--line);border-radius:12px;padding:17px;min-width:0
+}
+.card.wide{grid-column:span 8}
+.card.full{grid-column:1/-1}
+.card h2{margin:0 0 14px;font-size:12px;font-weight:650;color:#c6c6ca;letter-spacing:.01em}
+.metric{font-size:31px;font-weight:760;letter-spacing:-.05em}
+.metric small{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.gold{color:var(--gold2)}
+.muted{color:var(--muted)}
+.good{color:var(--green)}
+.bad{color:var(--red)}
+.blue{color:var(--blue)}
+.rowlist{display:grid;gap:8px}
+.r{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:9px 0;border-bottom:1px solid #19191b
+}
+.r:last-child{border-bottom:0}
+.rk{min-width:0}
+.rk strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.rn{font-variant-numeric:tabular-nums;font-weight:700}
+.bar-wrap{height:5px;background:#1a1a1c;border-radius:999px;margin-top:6px;overflow:hidden}
+.bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px}
+.searchbox{
+  width:100%;background:#0a0a0b;border:1px solid var(--line);color:#fff;
+  border-radius:8px;padding:9px 10px;margin-bottom:9px;outline:none
+}
+.searchbox:focus{border-color:#505055}
+.live-feed{display:grid;gap:0}
+.feed{
+  display:grid;grid-template-columns:62px 52px minmax(0,1fr) auto;gap:9px;
+  padding:8px 0;border-bottom:1px solid #18181a;font-size:11px;align-items:center
+}
+.feed:last-child{border-bottom:0}
+.feed .method{color:var(--gold)}
+.feed .time{color:#777}
+.feed .endpoint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed .age{color:#666;font-variant-numeric:tabular-nums}
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table th,.table td{text-align:left;padding:9px 8px;border-bottom:1px solid #19191b}
+.table th{color:#777;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.empty{padding:24px 4px;color:#666;text-align:center;font-size:12px}
+.footer{
+  margin-top:26px;padding-top:16px;border-top:1px solid var(--line);
+  color:#666;font-size:11px
+}
+.footer strong{color:#aaa}
+@media(max-width:1000px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .nav{display:flex;overflow:auto}
+  .nav button{white-space:nowrap}
+  .side-bottom{position:static;margin-top:14px}
+  .main{padding:20px 16px 32px}
+  .card,.card.wide{grid-column:span 6}
+}
+@media(max-width:650px){
+  .top{align-items:flex-start}
+  h1{font-size:23px}
+  .grid{grid-template-columns:1fr}
+  .card,.card.wide,.card.full{grid-column:1/-1}
+  .feed{grid-template-columns:54px 42px minmax(0,1fr) auto}
+}
 `;
 
 const LOGIN_CSS = `
-  body { display: grid; place-items: center; min-height: 100vh; padding: 20px; }
-  form { width: min(340px, 100%); }
-  input {
-    width: 100%; font: inherit; padding: 12px 14px; margin: 14px 0 10px;
-    border-radius: 10px; border: 1px solid var(--line); background: #0f1828; color: var(--ink);
-  }
-  button { width: 100%; background: var(--brand); border-color: var(--brand); color: #08111f; font-weight: 650; }
-  .err { color: var(--bad); font-size: 13px; min-height: 18px; }
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#070707;color:#f5f5f7;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login{
+  width:min(420px,100%);background:#0d0d0e;border:1px solid #242427;border-radius:16px;
+  padding:28px;box-shadow:0 30px 100px #000
+}
+.kicker{color:#d6ae4d;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:25px;letter-spacing:-.04em;margin:7px 0}
+p{color:#85858c;font-size:13px;line-height:1.5}
+label{display:block;color:#9e9ea5;font-size:11px;margin:22px 0 7px}
+input{
+  width:100%;padding:12px;border-radius:9px;border:1px solid #29292c;background:#09090a;
+  color:#fff;outline:none
+}
+input:focus{border-color:#d6ae4d}
+button{
+  width:100%;margin-top:12px;padding:12px;border:0;border-radius:9px;
+  background:linear-gradient(180deg,#e1bd61,#bb9134);color:#0a0803;font-weight:750
+}
+.err{margin-top:10px;color:#ff7777;font-size:12px}
+.owner{margin-top:24px;padding-top:16px;border-top:1px solid #222;color:#666;font-size:11px;line-height:1.55}
+.owner strong{color:#bdbdc1}
 `;
 
-export function adminLogin(nonce, error = '') {
-  return `<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>ST Tracker — admin</title>
-<style nonce="${nonce}">${SHELL_CSS}${LOGIN_CSS}</style></head><body>
-<form id="f" autocomplete="off">
-  <h1>ST Tracker</h1>
-  <div class="muted">Owner dashboard</div>
-  <input id="p" type="password" placeholder="Password" autocomplete="current-password" required autofocus>
-  <div class="err" id="e">${esc(error)}</div>
-  <button type="submit">Sign in</button>
-</form>
-<script nonce="${nonce}">
-  const form = document.getElementById('f');
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const res = await fetch('/admin/login', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ password: document.getElementById('p').value }),
-    });
-    if (res.ok) return location.replace('/admin');
-    // The server answers a failure with the whole login page, error and all.
-    document.documentElement.innerHTML = await res.text();
-  });
-</script>
-</body></html>`;
+
+function card(title, inner, cls = '') {
+  return `<section class="card ${cls}"><h2>${esc(title)}</h2>${inner}</section>`;
 }
 
-export function adminPage(nonce) {
-  return `<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>ST Tracker — admin</title>
-<style nonce="${nonce}">${SHELL_CSS}</style></head><body>
-<div class="app">
-  <aside class="side">
-    <div class="brand">ST Tracker</div>
-    <nav id="nav">
-      <button data-view="overview" class="on">Overview</button>
-      <button data-view="people">People</button>
-      <button data-view="behaviour">Behaviour</button>
-      <button data-view="buses">Buses &amp; routes</button>
-      <button data-view="community">Rider reports</button>
-      <button data-view="sessions">Sessions</button>
-      <button data-view="health">Health</button>
-    </nav>
-    <div class="side-foot">
-      <div class="range" id="range">
-        <button data-days="1" class="on">1d</button>
-        <button data-days="7">7d</button>
-        <button data-days="30">30d</button>
-        <button data-days="90">90d</button>
+function big(value, sub = '') {
+  return `<div class="metric">${esc(value)}</div><div class="muted" style="margin-top:5px">${esc(sub)}</div>`;
+}
+
+function kv(label, value, cls = '') {
+  return `<div class="r"><div class="rk"><strong>${esc(label)}</strong></div><div class="rn ${cls}">${esc(value)}</div></div>`;
+}
+
+function pretty(v) {
+  return String(v ?? '')
+    .replace(/^screen:/, '')
+    .replace(/^act:/, '')
+    .replace(/^entry:/, '')
+    .replace(/^set:/, '')
+    .replace(/^onboard:/, '')
+    .replace(/^perf:/, '')
+    .replace(/^net:/, '')
+    .replace(/^err:/, 'error ')
+    .replace(/^miss:/, 'miss ')
+    .replace(/-/g, ' ');
+}
+
+function bars(rows = [], max = null) {
+  const data = Array.isArray(rows) ? rows : [];
+  if (!data.length) return `<div class="empty">No data yet</div>`;
+
+  const ceiling = max || Math.max(...data.map((r) => Number(r.n || r.devices || r.lookups || 0)), 1);
+
+  return `<div class="rowlist">${data.map((r) => {
+    const n = Number(r.n || r.devices || r.lookups || 0);
+    const label = r.key ?? r.plate ?? r.name ?? '';
+    const pct = Math.max(3, Math.min(100, Math.round((n / ceiling) * 100)));
+    return `<div class="r">
+      <div class="rk">
+        <strong>${esc(label)}</strong>
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
       </div>
-      <button id="out" class="signout">Sign out</button>
+      <div class="rn">${fmt(n)}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function table(headers, rows) {
+  if (!rows.length) return `<div class="empty">No data yet</div>`;
+  return `<table class="table"><thead><tr>${
+    headers.map((h) => `<th>${esc(h)}</th>`).join('')
+  }</tr></thead><tbody>${
+    rows.map((row) => `<tr>${row.map((v) => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')
+  }</tbody></table>`;
+}
+
+function line(rows, value, label) {
+  const data = Array.isArray(rows) ? rows : [];
+  if (!data.length) return `<div class="empty">${esc(label)}: no data</div>`;
+  const max = Math.max(...data.map((r) => Number(value(r) || 0)), 1);
+  return `<div class="rowlist">${data.map((r) => {
+    const n = Number(value(r) || 0);
+    const pct = Math.max(3, Math.min(100, Math.round((n / max) * 100)));
+    return `<div class="r"><div class="rk"><strong>${esc(r.day || r.hour || '')}</strong><div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div></div><div class="rn">${fmt(n)}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function funnel(rows = []) {
+  return bars((rows || []).map((r) => ({ key: r.label, n: r.devices })));
+}
+
+function hours(rows = []) {
+  return bars((rows || []).map((r) => ({ key: String(r.key).padStart(2, '0') + ':00', n: r.n })));
+}
+
+function clockRows(rows) {
+  return (rows || []).map((r) => ({ key: String(r.hour).padStart(2, '0'), n: r.n }));
+}
+
+function journeys(rows = []) {
+  return bars((rows || []).map((r) => ({ key: r.plate, n: r.n || r.lookups })));
+}
+
+function grid(cards) {
+  return `<div class="grid">${cards.filter(Boolean).join('')}</div>`;
+}
+
+function wide(content) {
+  return content;
+}
+
+function recentFeed(rows = []) {
+  if (!rows.length) return `<div class="empty">Waiting for live requests</div>`;
+  return `<div class="live-feed">${
+    rows.map((r) => `<div class="feed">
+      <span class="time">${esc(r.agoSec)}s</span>
+      <span class="method">${esc(r.method)}</span>
+      <span class="endpoint">${esc('/api/' + (r.endpoint === 'root' ? '' : r.endpoint))}</span>
+      <span class="age">ago</span>
+    </div>`).join('')
+  }</div>`;
+}
+
+function stationSearches(rows = []) {
+  if (!rows.length) return `<div class="empty">No station searches recorded yet</div>`;
+  return `<div class="rowlist">${
+    rows.map((r) => `<div class="r">
+      <div class="rk">
+        <strong>${esc(r.key)}</strong>
+        <span>station search</span>
+        <div class="bar-wrap"><div class="bar" style="width:${Math.max(3, Math.min(100, (Number(r.n || 0) / Math.max(...rows.map(x => Number(x.n || 0)), 1)) * 100))}%"></div></div>
+      </div>
+      <div class="rn">${fmt(r.n)}</div>
+    </div>`).join('')
+  }</div>`;
+}
+
+export function adminLogin(nonce, error = '') {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ST Tracker Admin</title>
+<style nonce="${nonce}">${LOGIN_CSS}</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="login">
+    <div class="kicker">ST Tracker</div>
+    <h1>Admin Console</h1>
+    <p>Private owner dashboard for product usage, searches, requests and operations.</p>
+    <form method="post" action="/admin/login" id="login-form">
+      <label for="password">Admin password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+      <button type="submit">Sign in</button>
+      ${error ? `<div class="err">${esc(error)}</div>` : ''}
+    </form>
+    <div class="owner">
+      <strong>Devam Namera</strong>
+      Founder &amp; Lead Developer<br>
+      ST Tracker
     </div>
-  </aside>
-  <main class="main">
-    <header><h1 id="title">Overview</h1><span class="muted" id="stamp">loading…</span></header>
-    <div id="view"></div>
   </main>
 </div>
 <script nonce="${nonce}">
+const form = document.getElementById('login-form');
+function big(value, sub = '') {
+  return '<div class="metric">' + esc(value) +
+    '</div><div class="muted" style="margin-top:5px">' + esc(sub) +
+    '</div>';
+}
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('password').value;
+  const res = await fetch('/admin/login', {
+    method: 'POST',
+    headers: {'content-type':'application/json'},
+    body: JSON.stringify({password}),
+  });
+  if (res.ok) location.replace('/admin');
+  else location.replace('/admin?error=1');
+});
+</script>
+</body>
+</html>`;
+}
+
+export function adminPage(nonce) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ST Tracker Admin</title>
+<style nonce="${nonce}">${SHELL_CSS}</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      ST Tracker
+      <span>Admin Console</span>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="on" data-view="overview">Overview</button>
+      <button data-view="searches">Searches</button>
+      <button data-view="requests">Requests</button>
+      <button data-view="buses">Buses &amp; Routes</button>
+      <button data-view="devices">Devices</button>
+      <button data-view="behaviour">Behaviour</button>
+      <button data-view="community">Rider Reports</button>
+      <button data-view="health">System Health</button>
+    </nav>
+
+    <div class="side-bottom">
+      <div class="toolbar" id="range">
+        <button class="on" data-days="1">1D</button>
+        <button data-days="7">7D</button>
+        <button data-days="30">30D</button>
+        <button data-days="90">90D</button>
+      </div>
+      <button id="signout" style="width:100%;padding:9px;border-radius:8px;border:1px solid #242427;background:#0d0d0f;color:#aaa">Sign out</button>
+      <div class="owner">
+        <strong>Devam Namera</strong>
+        Founder &amp; Lead Developer
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <div class="kicker">Owner Analytics</div>
+        <h1 id="title">Overview</h1>
+        <div class="subtitle" id="stamp">Loading live data…</div>
+      </div>
+      <div class="live"><span class="dot"></span><span id="liveText">LIVE</span></div>
+    </div>
+
+    <div id="view"></div>
+
+    <div class="footer">
+      <strong>ST Tracker</strong> · Private analytics console ·
+      Designed &amp; engineered by <strong>Devam Namera</strong>
+    </div>
+  </main>
+</div>
+
+<script nonce="${nonce}">
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => (
-  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+));
 
-const OCCUPANCY = { 1: 'Many seats', 2: 'Some seats', 3: 'Standing', 4: 'Crowded', 5: 'Cannot board' };
-
-const card = (title, inner) => '<div class="card"><h2>' + esc(title) + '</h2>' + inner + '</div>';
-const kv = (k, v) => '<div class="kv"><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>';
-
-function bars(rows, label = (r) => r.key) {
-  if (!rows || !rows.length) return '<div class="empty">Nothing yet today.</div>';
-  const max = Math.max(...rows.map((r) => r.n));
-  return rows.map((r) =>
-    '<div class="row"><span class="name">' + esc(label(r)) + '</span>'
-    + '<span class="bar" style="width:' + Math.round((r.n / max) * 96) + 'px"></span>'
-    + '<span class="n">' + r.n + '</span></div>').join('');
-}
-
-function hours(rows) {
-  if (!rows || !rows.length) return '<div class="empty">Nothing yet in this range.</div>';
-  const byHour = Object.fromEntries(rows.map((r) => [String(r.key).padStart(2, '0'), r.n]));
-  const max = Math.max(...rows.map((r) => r.n), 1);
-  const peak = rows.reduce((a, b) => (b.n > a.n ? b : a));
-  const total = rows.reduce((a, b) => a + b.n, 0);
-
-  let out = '<div class="chart-head"><span>' + total + ' events</span><b>busiest '
-    + esc(String(peak.key).padStart(2, '0')) + ':00</b></div><div class="hours">';
-  for (let h = 0; h < 24; h += 1) {
-    const key = String(h).padStart(2, '0');
-    const n = byHour[key] || 0;
-    // Three tiers rather than a gradient: quiet, busy, and the peak. A commuter day has two
-    // humps and the point is to see them, not to grade every hour against every other.
-    const cls = n === max && n > 0 ? ' class="peak"' : (n > max * 0.4 ? ' class="busy"' : '');
-    out += '<i' + cls + ' style="height:' + Math.max(3, Math.round((n / max) * 110)) + 'px" title="'
-      + esc(key + ':00 — ' + n) + '"></i>';
-  }
-  out += '</div><div class="hours-axis"><span>00</span><span>06</span><span>12</span>'
-    + '<span>18</span><span>23</span></div>';
-  return out;
-}
-
-/**
- * A trend line, drawn as inline SVG.
- *
- * No charting library: the page runs under a CSP that allows one nonced script and no external
- * hosts, and a trend line is a polyline. Given real height, gridlines at nothing/half/peak, and
- * a labelled date axis — a sparkline without a scale is decoration, not a reading.
- */
-function line(rows, pick, label) {
-  const vals = (rows || []).map(pick);
-  const max = Math.max(...vals, 1);
-  const total = vals.reduce((a, b) => a + b, 0);
-
-  // A single day cannot be a trend, and a flat segment between two points would imply one.
-  if (vals.length < 2) {
-    return '<div class="chart-head"><span>' + esc(label) + '</span><b>' + (vals[0] || 0) + '</b></div>'
-      + '<div class="empty">One day so far — a trend needs at least two.</div>';
-  }
-
-  const w = 300; const h = 110; const pad = 4;
-  const x = (i) => (i / (vals.length - 1)) * w;
-  const y = (v) => h - pad - (v / max) * (h - pad * 2);
-  const pts = vals.map((v, i) => x(i) + ',' + y(v)).join(' ');
-  const gridLines = [0, 0.5, 1].map((q) =>
-    '<line class="grid-line" x1="0" y1="' + y(max * q) + '" x2="' + w + '" y2="' + y(max * q) + '"/>').join('');
-  const dots = vals.map((v, i) =>
-    '<circle class="dot" cx="' + x(i) + '" cy="' + y(v) + '" r="2.5"/>').join('');
-
-  return '<div class="chart-wrap">'
-    + '<div class="chart-head"><span>' + esc(label) + ' · ' + total + ' total</span>'
-    + '<b>peak ' + max + '</b></div>'
-    + '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">'
-    + '<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">'
-    + '<stop offset="0%" stop-color="#5b8def" stop-opacity=".34"/>'
-    + '<stop offset="100%" stop-color="#5b8def" stop-opacity="0"/></linearGradient></defs>'
-    + gridLines
-    + '<polygon class="area" points="0,' + h + ' ' + pts + ' ' + w + ',' + h + '"/>'
-    + '<polyline class="line" points="' + pts + '"/>' + dots
-    + '</svg>'
-    + '<div class="chart-axis"><span>' + esc(rows[0].day) + '</span>'
-    + '<span>' + esc(rows[rows.length - 1].day) + '</span></div></div>';
-}
-
-/** A funnel: how many devices reached each step, and what fell away between them. */
-function funnel(steps) {
-  if (!steps || !steps.length) return '<div class="empty">Nothing yet in this range.</div>';
-  const top = steps[0].devices || 1;
-  return steps.map((s, i) => {
-    const pct = Math.round((s.devices / top) * 100);
-    const prev = i ? steps[i - 1].devices : s.devices;
-    const drop = prev && i ? prev - s.devices : 0;
-    return '<div class="step"><div class="step-top"><span>' + esc(s.label) + '</span>'
-      + '<b>' + s.devices + '</b></div>'
-      + '<div class="step-bar"><i style="width:' + pct + '%"></i></div>'
-      + (drop > 0 ? '<div class="step-drop">-' + drop + ' here</div>' : '')
-      + '</div>';
-  }).join('');
-}
-
-const PREFIXES = ['screen:', 'act:', 'onboard:', 'set:', 'app:', 'entry:', 'err:', 'miss:',
-  'perf:', 'net:', 'dwell:'];
-/** Strips the category prefix so a card reads as labels rather than as raw counter names. */
-function pretty(name) {
-  for (const p of PREFIXES) if (name.indexOf(p) === 0) return name.slice(p.length).replace(/-/g, ' ');
-  return name;
-}
-
-/** One visit, as the path actually taken through the app. */
-function journeys(rows) {
-  if (!rows || !rows.length) return '<div class="empty">No visits recorded yet.</div>';
-  return rows.map((s) => {
-    const when = new Date(s.last_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const path = (s.path || []).map((e) =>
-      '<span class="hop">' + esc(pretty(e.name)) + (e.detail ? ' ' + esc(e.detail) : '') + '</span>')
-      .join('<span class="arr">›</span>');
-    return '<div class="jrn"><div class="jrn-head">'
-      + '<span class="tag">' + esc(s.device) + '</span>'
-      + '<span class="muted">' + esc(when) + ' · ' + s.durationSec + 's · '
-      + esc(s.platform || '?') + (s.standalone ? ' · installed' : '') + '</span></div>'
-      + '<div class="hops">' + (path || '<span class="muted">no steps</span>') + '</div></div>';
-  }).join('');
-}
+const OCCUPANCY = {1:'Many seats',2:'Some seats',3:'Standing',4:'Crowded',5:'Cannot board'};
+const kv = (label, value, cls = '') =>
+  '<div class="r"><div class="rk"><strong>' + esc(label) +
+  '</strong></div><div class="rn ' + esc(cls) + '">' + esc(value) +
+  '</div></div>';
 
 let days = 1;
 let view = 'overview';
+let lastData = null;
+let loadBusy = false;
+
+const nav = document.getElementById('nav');
+const range = document.getElementById('range');
+const host = document.getElementById('view');
+
+const fmt = (v) => Number(v || 0).toLocaleString('en-IN');
+
+const safe = (v) => v == null ? 0 : v;
+
+function big(value, sub = '') {
+  return '<div class="metric">' + esc(value) +
+    '</div><div class="muted" style="margin-top:5px">' + esc(sub) +
+    '</div>';
+}
+const metric = (value, sub, cls='') =>
+  '<div class="metric ' + cls + '">' + esc(value) + '</div><div class="muted" style="margin-top:5px">' + esc(sub) + '</div>';
+
+const card = (title, body, cls='') =>
+  '<section class="card ' + cls + '"><h2>' + esc(title) + '</h2>' + body + '</section>';
+
+const barList = (rows, key='key') => {
+  rows = Array.isArray(rows) ? rows : [];
+  if (!rows.length) return '<div class="empty">No data yet</div>';
+  const vals = rows.map(r => Number(r.n ?? r.devices ?? r.lookups ?? 0));
+  const max = Math.max(...vals, 1);
+  return '<div class="rowlist">' + rows.map(r => {
+    const n = Number(r.n ?? r.devices ?? r.lookups ?? 0);
+    const name = r[key] ?? '';
+    const pct = Math.max(3, Math.min(100, (n / max) * 100));
+    return '<div class="r"><div class="rk"><strong>' + esc(name) +
+      '</strong><div class="bar-wrap"><div class="bar" style="width:' + pct + '%"></div></div></div>' +
+      '<div class="rn">' + fmt(n) + '</div></div>';
+  }).join('') + '</div>';
+};
+
+const recent = (rows) => {
+  rows = Array.isArray(rows) ? rows : [];
+  if (!rows.length) return '<div class="empty">No requests in the live window</div>';
+  return '<div class="live-feed">' + rows.map(r =>
+    '<div class="feed"><span class="time">' + esc(r.agoSec) + 's</span>' +
+    '<span class="method">' + esc(r.method) + '</span>' +
+    '<span class="endpoint">' + esc('/api/' + (r.endpoint === 'root' ? '' : r.endpoint)) + '</span>' +
+    '<span class="age">ago</span></div>'
+  ).join('') + '</div>';
+};
+
+const table = (headers, rows) => {
+  if (!rows.length) return '<div class="empty">No data yet</div>';
+  return '<table class="table"><thead><tr>' +
+    headers.map(h => '<th>' + esc(h) + '</th>').join('') +
+    '</tr></thead><tbody>' +
+    rows.map(row => '<tr>' + row.map(v => '<td>' + esc(v) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table>';
+};
+
+function line(rows, fn, label='') {
+  rows = Array.isArray(rows) ? rows : [];
+  if (!rows.length) return '<div class="empty">' + esc(label) + ': no data</div>';
+  const max = Math.max(...rows.map(r => Number(fn(r) || 0)), 1);
+  return '<div class="rowlist">' + rows.map(r => {
+    const n = Number(fn(r) || 0);
+    const pct = Math.max(3, Math.min(100, (n / max) * 100));
+    return '<div class="r"><div class="rk"><strong>' + esc(r.day || r.hour || '') +
+      '</strong><div class="bar-wrap"><div class="bar" style="width:' + pct + '%"></div></div></div>' +
+      '<div class="rn">' + fmt(n) + '</div></div>';
+  }).join('') + '</div>';
+}
+
+function funnel(rows) {
+  return barList(rows, 'label');
+}
+
+function journeys(rows) {
+  return barList(rows, 'plate');
+}
+
+function pretty(v) {
+  return String(v ?? '').replace(/^[^:]+:/, '').replace(/-/g,' ');
+}
+
+function bars(rows) {
+  return barList(rows);
+}
+
+function hours(rows) {
+  return barList((rows || []).map(r => ({key:String(r.key ?? r.hour).padStart(2,'0') + ':00', n:r.n})));
+}
+
+function clockRows(rows) {
+  return (rows || []).map(r => ({key:String(r.hour).padStart(2,'0'), n:r.n}));
+}
+
+function grid(cards) {
+  return '<div class="grid">' + cards.filter(Boolean).join('') + '</div>';
+}
+
+function wide(content) {
+  return content;
+}
+
+function stationRows(rows) {
+  rows = Array.isArray(rows) ? rows : [];
+  if (!rows.length) return '<div class="empty">No station searches recorded yet</div>';
+  const max = Math.max(...rows.map(r => Number(r.n || 0)), 1);
+  return '<div class="rowlist">' + rows.map((r, i) => {
+    const n = Number(r.n || 0);
+    const pct = Math.max(3, Math.min(100, (n / max) * 100));
+    return '<div class="r"><div class="rk"><strong>' +
+      '<span style="color:#777;margin-right:7px">' + String(i+1).padStart(2,'0') + '</span>' +
+      esc(r.key) +
+      '</strong><div class="bar-wrap"><div class="bar" style="width:' + pct + '%"></div></div>' +
+      '</div><div class="rn">' + fmt(n) + '</div></div>';
+  }).join('') + '</div>';
+}
 
 async function load() {
-  const res = await fetch('/admin/stats?days=' + days);
-  if (res.status === 401) return location.replace('/admin');
-  const d = await res.json();
+  if (loadBusy) return;
+  loadBusy = true;
 
-  document.getElementById('stamp').textContent =
-    (d.range.days === 1 ? d.range.to : d.range.from + ' to ' + d.range.to)
-    + ' · up ' + Math.floor(d.server.uptimeSec / 3600) + 'h · v' + d.server.version;
+  try {
+    const res = await fetch('/admin/stats?days=' + days, {cache:'no-store'});
+    if (res.status === 401) {
+      location.replace('/admin');
+      return;
+    }
 
-  const p = d.people || {};
-  const ret = p.retention || {};
-  const events = (p.eventCounts) || [];
-  const group = (prefix) => events
-    .filter((e) => e.key.indexOf(prefix) === 0)
-    .map((e) => ({ key: e.key.slice(prefix.length).replace(/-/g, ' '), n: e.n }));
+    const d = await res.json();
+    lastData = d;
 
-  const VIEWS = {
-    overview: () => grid([
-      card('People', big(p.devices || 0,
-        (p.sessions || 0) + ' visits · ' + (p.avgSessionSec || 0) + 's average · '
-        + (p.bouncedPct || 0) + '% did nothing')),
-      card('Coming back', big((ret.returningPct || 0) + '%',
-        (ret.returning || 0) + ' of ' + (ret.total || 0) + ' had used it before')),
-      card('Requests', big(d.traffic.requests, 'API calls in range')),
-      card('Rider reports', big(d.community.reports, 'occupancy and status reports stored')),
-      card('Devices and visits per day',
-        line(p.daily || [], (r) => r.devices, 'devices')
-        + line(p.daily || [], (r) => r.sessions, 'visits')),
-      card('When the app is used (IST)', hours(clockRows(p.hours))),
-    ]),
+    const rangeText = d.range.days === 1
+      ? d.range.to
+      : d.range.from + ' to ' + d.range.to;
 
-    people: () => grid([
-      card('Devices', bars((p.platforms || []).map((r) => ({ key: r.key, n: r.devices })))),
-      card('How people arrive', bars((p.entries || []).map((r) => ({ key: pretty(r.key), n: r.n })))),
-      card('Where people start', bars((p.firstScreens || []).map((r) => ({ key: pretty(r.key), n: r.n })))),
-      card('Did they come back?', (p.cohorts || []).length
-        ? (p.cohorts).map((c) =>
-          '<div class="row"><span class="name">' + esc(c.day) + '</span>'
-          + '<span class="bar" style="width:' + Math.round((c.returned / Math.max(1, c.devices)) * 90) + 'px"></span>'
-          + '<span class="n">' + c.returned + '/' + c.devices + '</span></div>').join('')
-        : '<div class="empty">Needs more than one day.</div>'),
-      card('Phones and networks', bars([...group('perf:'), ...group('net:'),
-        ...events.filter((e) => e.key === 'screen:small' || e.key === 'screen:large')
-          .map((e) => ({ key: e.key.slice(7), n: e.n }))])),
-    ]),
+    document.getElementById('stamp').textContent =
+      rangeText + ' · refresh ' + new Date().toLocaleTimeString('en-IN');
 
-    behaviour: () => grid([
-      card('Screens opened', bars(group('screen:').filter((r) => !['small', 'large'].includes(r.key)))),
-      card('What people do', bars(group('act:'))),
-      card('Onboarding', bars(group('onboard:'))),
-      card('Settings chosen', bars(group('set:'))),
-      card('Onboarding funnel', funnel(p.funnels && p.funnels.onboarding)),
-      card('Getting to an alert', funnel(p.funnels && p.funnels.alerts)),
-      card('Where the app fails people', [...group('miss:'), ...group('err:')].length
-        ? bars([...group('miss:'), ...group('err:')])
-        : '<div class="empty">Nothing failed in this range.</div>'),
-    ]) + wide(card('Every event recorded', table(
-      ['Event', 'Count', 'Devices'],
-      events.map((r) => [r.key, r.n, r.devices != null ? r.devices : '—']),
-      'events'))),
+    const p = d.people || {};
+    const t = d.traffic || {};
+    const b = d.buses || {};
+    const r = d.routes || {};
+    const st = d.stations || {};
+    const u = d.usage || {};
+    const com = d.community || {};
+    const liveNow = Number(t.lastMinute || 0);
 
-    buses: () => grid([
-      card('Most tracked buses', bars(d.buses.topPlates)),
-      card('Most searched routes', bars(d.routes.topRoutes)),
-      card('Busiest endpoints', bars(d.traffic.byEndpoint)),
-      card('Observed timetable', (() => {
-        const h = d.harvest || {};
-        return kv('Harvest runs', h.runs || 0) + kv('Services read', h.trips || 0)
-          + kv('Arrival times captured', h.arrivals || 0)
-          + kv('Stored in total', d.community.arrivals) + kv('Errors', h.errors || 0);
-      })()),
-    ]) + wide(card('Bus lookups per device', table(
-      ['Bus', 'Lookups', 'Devices', 'Sessions'],
-      (p.busHistory || []).map((r) => [r.plate, r.lookups, r.devices, r.sessions]),
-      'bushist')))
-      + wide(card('Regulars — devices that keep returning to one bus', table(
-        ['Device', 'Bus', 'Lookups', 'Days'],
-        (p.regulars || []).map((r) => [r.device, r.plate, r.n, r.days]),
-        'regulars'))),
+    document.getElementById('liveText').textContent =
+      liveNow ? liveNow + ' req/min' : 'LIVE';
 
-    community: () => grid([
-      card('How full riders say buses are', bars((d.community.occupancy || []).map(
-        (r) => ({ key: OCCUPANCY[r.level] || r.level, n: r.n })))),
-      card('Replacements reported', (d.community.replacements || []).length
-        ? d.community.replacements.map((r) =>
-          '<div class="row"><span class="name">' + esc(r.plate) + ' → ' + esc(r.replacement)
-          + '</span><span class="n">' + r.n + '</span></div>').join('')
-        : '<div class="empty">None reported.</div>'),
-      card('Alerts', kv('Subscriptions', d.community.subscriptions)
-        + kv('Waiting to fire', d.community.pendingAlerts) + kv('Sent', d.push.sent)
-        + kv('Failed', d.push.failed) + kv('Expired', d.push.expired)),
-    ]),
+    const views = {
+      overview: () => grid([
+        card('Requests today', metric(t.requests, 'API calls stored today', 'gold')),
+        card('Live traffic', metric(t.lastMinute || 0, 'requests in the last 60 seconds', 'good')),
+        card('5-minute traffic', metric(t.lastFiveMinutes || 0, 'requests in the last 5 minutes')),
+        card('Station searches', metric(st.searchesToday || 0, 'station searches today')),
+        card('Route searches', metric(r.searchesToday || 0, 'route searches today')),
+        card('Bus tracking', metric(b.lookupsToday || 0, 'bus lookups today')),
 
-    sessions: () => wide(card('All sessions', table(
-      ['Device', 'Day', 'Started', 'Seconds', 'Events', 'Platform', 'Entry'],
-      (p.sessionList || []).map((r) => [
-        r.device, r.day,
-        new Date(r.started_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-        Math.round((r.last_at - r.started_at) / 1000), r.events,
-        r.platform + (r.standalone ? ' (installed)' : ''), pretty(r.entry || ''),
-      ]), 'sessions')))
-      + wide(card('Recent journeys', journeys(p.recent))),
+        card('What people searched',
+          '<div class="muted" style="margin-bottom:10px">Top stations by actual search query</div>' +
+          stationRows(st.topStations || []), 'wide'),
 
-    health: () => grid([
-      card('GSRTC API health', (d.uptime || []).length
-        ? (d.uptime).map((u) =>
-          '<div class="kv"><span>' + esc(u.name) + '</span><b>' + u.calls + ' calls'
-          + (u.dataErrors ? ' · <span style="color:var(--bad)">' + u.dataErrors + ' bad</span>' : '')
-          + (u.medianMs != null ? ' · ' + u.medianMs + 'ms' : '') + '</b></div>').join('')
-        : '<div class="empty">No upstream calls since restart.</div>'),
-      card('Tracker', kv('Watching', d.tracker.watching) + kv('With a live fix', d.tracker.withFixes)
-        + kv('Polls/sec', d.tracker.pollsPerSecond) + kv('Upstream errors', d.tracker.errors)),
-      card('Probe', kv('Every', (d.probe && d.probe.everySec) + 's')
-        + kv('Checks', d.probe && d.probe.checks) + kv('Per day', d.probe && d.probe.perDay)),
-      card('Server', kv('Memory', d.server.memoryMb + ' MB') + kv('Cached', d.server.cacheEntries)
-        + kv('Node', d.server.node) + kv('Version', d.server.version)),
-    ]),
-  };
+        card('Live request stream',
+          '<div class="muted" style="margin-bottom:10px">Latest API activity · 5 minute window</div>' +
+          recent(t.recent || []), 'wide'),
 
-  document.getElementById('view').innerHTML = (VIEWS[view] || VIEWS.overview)();
-  document.getElementById('title').textContent =
-    document.querySelector('#nav button.on')?.textContent || 'Overview';
+        card('Most searched routes', barList(r.topRoutes || [])),
+        card('Most tracked buses', barList(b.topPlates || [])),
+        card('Devices', barList((p.platforms || []).map(x => ({key:x.key,n:x.devices})))),
+        card('Popular screens', barList((u.events || []).filter(x => String(x.key).startsWith('screen:')).map(x => ({key:pretty(x.key),n:x.n}))))
+      ]),
+
+      searches: () => grid([
+        card('Station searches today', metric(st.searchesToday || 0, 'actual /api/stations queries')),
+        card('Route searches today', metric(r.searchesToday || 0, 'origin → destination searches')),
+        card('Search detail', stationRows(st.topStations || []), 'full'),
+        card('Route detail', barList(r.topRoutes || []), 'wide'),
+      ]),
+
+      requests: () => grid([
+        card('Requests today', metric(t.requests || 0, 'persisted API requests')),
+        card('Last minute', metric(t.lastMinute || 0, 'live request count', 'good')),
+        card('Last 5 minutes', metric(t.lastFiveMinutes || 0, 'live request count')),
+        card('Busiest endpoints', barList(t.byEndpoint || []), 'wide'),
+        card('Live stream', recent(t.recent || []), 'full'),
+        card('Daily traffic', line(t.dailyRequests || [], r => r.n, 'requests'), 'wide'),
+      ]),
+
+      buses: () => grid([
+        card('Most tracked buses', barList(b.topPlates || []), 'wide'),
+        card('Most searched routes', barList(r.topRoutes || [])),
+        card('Busiest API endpoints', barList(t.byEndpoint || [])),
+        card('Bus lookups', table(
+          ['Bus', 'Lookups', 'Devices', 'Sessions'],
+          (p.busHistory || []).map(x => [x.plate, x.lookups, x.devices, x.sessions])
+        ), 'full'),
+      ]),
+
+      devices: () => grid([
+        card('Unique devices', metric(p.devices || 0, 'aggregate devices in selected range')),
+        card('Visits', metric(p.sessions || 0, 'sessions in selected range')),
+        card('Average session', metric((p.avgSessionSec || 0) + 's', 'average duration')),
+        card('Device platforms', barList((p.platforms || []).map(x => ({key:x.key,n:x.devices})), 'key'), 'wide'),
+        card('How visitors arrived', barList((p.entries || []).map(x => ({key:pretty(x.key),n:x.n})), 'key'), 'wide'),
+      ]),
+
+      behaviour: () => grid([
+        card('Most-used features', barList((p.eventCounts || []).slice(0,30))),
+        card('Screens', barList((u.events || []).filter(x => String(x.key).startsWith('screen:')).map(x => ({key:pretty(x.key),n:x.n})), 'key')),
+        card('Usage by hour', hours(clockRows(p.hours || [])), 'wide'),
+        card('Onboarding funnel', funnel((p.funnels || {}).onboarding || []), 'wide'),
+        card('Alert funnel', funnel((p.funnels || {}).alerts || []), 'wide'),
+      ]),
+
+      community: () => grid([
+        card('Rider reports', metric(com.reports || 0, 'reports stored')),
+        card('Arrivals observed', metric(com.arrivals || 0, 'arrival observations')),
+        card('Occupancy today', barList(Object.entries(com.occupancy || {}).map(([key,n]) => ({key:OCCUPANCY[key] || key,n})), 'key')),
+        card('Replacements', barList(com.replacements || [])),
+      ]),
+
+      health: () => grid([
+        card('Server', table(
+          ['Metric','Value'],
+          [
+            ['Version', d.server?.version || ''],
+            ['Node', d.server?.node || ''],
+            ['Memory', (d.server?.memoryMb || 0) + ' MB'],
+            ['Cache entries', d.server?.cacheEntries || 0],
+            ['Uptime', Math.floor((d.server?.uptimeSec || 0) / 3600) + 'h'],
+          ]
+        ), 'wide'),
+        card('Tracker',
+          kv('Watching', d.tracker?.watching || 0) +
+          kv('Live fixes', d.tracker?.withFix || 0) +
+          kv('Polls/sec', d.tracker?.pollsPerSec || 0) +
+          kv('Upstream errors', d.tracker?.errors || 0)),
+        card('Probe',
+          kv('Interval', (d.probe?.intervalSec || 0) + 's') +
+          kv('Checks', d.probe?.checks || 0) +
+          kv('Per day', d.probe?.perDay || 0)),
+        card('GSRTC API',
+          table(
+            ['Area','Calls','Avg'],
+            [
+              ['Live bus positions', d.uptime?.vehicle?.calls || d.probe?.vehicle?.calls || 0, d.uptime?.vehicle?.avgMs || 0],
+              ['Routes / stops', d.uptime?.stops?.calls || 0, d.uptime?.stops?.avgMs || 0],
+              ['Timetables', d.uptime?.timetable?.calls || 0, d.uptime?.timetable?.avgMs || 0],
+              ['Station search', d.uptime?.stations?.calls || 0, d.uptime?.stations?.avgMs || 0],
+            ]
+          ), 'full'),
+      ]),
+    };
+
+    host.innerHTML = (views[view] || views.overview)();
+  } catch (e) {
+    host.innerHTML = '<div class="card full"><h2>Dashboard error</h2><div class="bad">' +
+      esc(e?.message || e) + '</div></div>';
+  } finally {
+    loadBusy = false;
+  }
 }
 
-const grid = (cards) => '<div class="grid">' + cards.filter(Boolean).join('') + '</div>';
-const wide = (c) => '<div class="grid one">' + c + '</div>';
-const big = (v, sub) => '<div class="big">' + esc(v) + '</div><div class="muted">' + esc(sub) + '</div>';
-const clockRows = (rows) => (rows || []).map((r) => ({ key: String(r.hour).padStart(2, '0'), n: r.n }));
-
-/**
- * A sortable, searchable table.
- *
- * Every panel above is a summary of something; this is the something. Sorting is by click on a
- * header and filtering is live over the rows already rendered — no refetch, because the data is
- * already here and a round trip to re-sort numbers would be theatre.
- */
-function table(headers, rows, id) {
-  if (!rows.length) return '<div class="empty">Nothing in this range.</div>';
-  return '<input class="filter" data-filter="' + id + '" placeholder="Search…">'
-    + '<div class="tbl" id="t-' + id + '">'
-    + '<div class="tr th" style="grid-template-columns:repeat(' + headers.length + ',1fr)">'
-    + headers.map((h, i) => '<span data-sort="' + i + '">' + esc(h) + '</span>').join('')
-    + '</div>'
-    + rows.map((r) => '<div class="tr" style="grid-template-columns:repeat(' + headers.length + ',1fr)" '
-      + 'data-k="' + esc(r.join(' ').toLowerCase()) + '">'
-      + r.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>').join('')
-    + '</div>';
-}
-
-// Live search across any rendered table.
-document.addEventListener('input', (e) => {
-  const id = e.target.dataset && e.target.dataset.filter;
-  if (!id) return;
-  const q = e.target.value.trim().toLowerCase();
-  [...document.querySelectorAll('#t-' + id + ' .tr[data-k]')].forEach((row) => {
-    row.style.display = row.dataset.k.includes(q) ? '' : 'none';
-  });
-});
-
-// Click a header to sort. Numbers sort numerically, everything else alphabetically.
-document.addEventListener('click', (e) => {
-  const h = e.target.closest('[data-sort]');
-  if (!h) return;
-  const tbl = h.closest('.tbl');
-  const i = Number(h.dataset.sort);
-  const asc = tbl.dataset.asc === String(i);
-  tbl.dataset.asc = asc ? '' : String(i);
-  const rows = [...tbl.querySelectorAll('.tr[data-k]')];
-  rows.sort((a, b) => {
-    const x = a.children[i].textContent.trim();
-    const y = b.children[i].textContent.trim();
-    const nx = Number(x); const ny = Number(y);
-    const cmp = (!Number.isNaN(nx) && !Number.isNaN(ny)) ? nx - ny : x.localeCompare(y);
-    return asc ? cmp : -cmp;
-  });
-  rows.forEach((r) => tbl.appendChild(r));
-});
-
-document.getElementById('nav').addEventListener('click', (e) => {
+nav.addEventListener('click', (e) => {
   const b = e.target.closest('[data-view]');
   if (!b) return;
+
   view = b.dataset.view;
-  [...document.querySelectorAll('#nav button')].forEach((x) => x.classList.toggle('on', x === b));
+
+  [...nav.querySelectorAll('button')].forEach(x =>
+    x.classList.toggle('on', x === b)
+  );
+
   load();
 });
 
-document.getElementById('range').addEventListener('click', (e) => {
+range.addEventListener('click', (e) => {
   const b = e.target.closest('[data-days]');
   if (!b) return;
-  days = Number(b.dataset.days);
-  [...document.querySelectorAll('#range button')].forEach((x) => x.classList.toggle('on', x === b));
+
+  days = Number(b.dataset.days) || 1;
+
+  [...range.querySelectorAll('button')].forEach(x =>
+    x.classList.toggle('on', x === b)
+  );
+
   load();
 });
 
-// The event filter is live, and applies to the table already rendered rather than refetching.
-document.addEventListener('input', (e) => {
-  if (e.target.id !== 'evfilter') return;
-  const q = e.target.value.trim().toLowerCase();
-  [...document.querySelectorAll('#evtable .tr[data-k]')].forEach((row) => {
-    row.style.display = row.dataset.k.toLowerCase().includes(q) ? '' : 'none';
-  });
-});
-
-document.getElementById('out').addEventListener('click', async () => {
-  await fetch('/admin/logout', { method: 'POST' });
+document.getElementById('signout').addEventListener('click', async () => {
+  await fetch('/admin/logout', {method:'POST'});
   location.replace('/admin');
 });
 
 load();
-setInterval(load, 20000);
+setInterval(load, 1000);
 </script>
-</body></html>`;
+</body>
+</html>`;
 }
+
+
+
+
+
+
+
+
+
+
+
