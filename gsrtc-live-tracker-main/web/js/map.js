@@ -124,8 +124,6 @@ export function refreshTiles() {
 
 export const busIcon = (heading = null) => {
   const hasHeading = Number.isFinite(heading);
-  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  const direction = hasHeading ? dirs[Math.round(heading / 45) % 8] : '';
 
   return L.divIcon({
     className: '',
@@ -133,25 +131,26 @@ export const busIcon = (heading = null) => {
       <div
         class="bus-pin${hasHeading ? ' directional' : ''}"
         ${hasHeading ? `style="--bus-heading:${heading}deg"` : ''}
-        aria-label="${hasHeading ? `Bus heading ${direction}, ${heading} degrees` : 'Bus location'}"
+        aria-label="Live bus"
       >
         ${hasHeading ? `
-          <span class="bus-heading" aria-hidden="true">
-            <span class="bus-heading-arrow"></span>
+          <span class="bus-bearing" aria-hidden="true">
+            <span class="bus-bearing-line"></span>
+            <span class="bus-bearing-tip"></span>
           </span>
-          <span class="bus-direction">${direction}</span>
         ` : ''}
+        <span class="bus-glow" aria-hidden="true"></span>
         <span class="bus-body">
           ${icon('bus', 'i i-sm')}
         </span>
+        <span class="bus-live" aria-hidden="true"></span>
       </div>
     `,
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
-    tooltipAnchor: [0, -24],
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
+    tooltipAnchor: [0, -28],
   });
 };
-
 /**
  * A stop on the route. `at` marks the one the bus is standing at right now, which is the single
  * most useful thing the map can say â€” "it is sitting at Tankara" answers a waiting rider's
@@ -393,6 +392,8 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
+
+
 
 
 

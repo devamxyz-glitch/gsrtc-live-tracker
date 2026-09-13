@@ -30,6 +30,11 @@ function read() {
     const parsed = JSON.parse(raw);
     const res = { ...structuredClone(DEFAULTS), ...parsed, settings: { ...DEFAULTS.settings, ...(parsed.settings || {}) } };
     if (res.settings.text === 'largest') res.settings.text = 'large';
+
+    // FORCE PREMIUM DARK THEME
+    // Existing users may already have light stored in localStorage.
+    // ST Tracker now ships with the dark premium visual system by default.
+    res.settings.theme = 'dark';
     return res;
   } catch {
     return structuredClone(DEFAULTS);
@@ -185,4 +190,6 @@ export function clearAll() {
   state = structuredClone(DEFAULTS);
   commit();
 }
+
+
 
