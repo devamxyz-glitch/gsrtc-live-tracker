@@ -1,4 +1,4 @@
-/* Everything the app remembers lives here — in this browser only, never on a server.
+﻿/* Everything the app remembers lives here â€” in this browser only, never on a server.
    One namespaced key, one schema version, so a future format change can migrate cleanly. */
 
 const KEY = 'st.tracker.v1';
@@ -9,7 +9,7 @@ const DEFAULTS = {
   v: 1,
   settings: {
     lang: null,              // null => detect from the browser
-    theme: 'system',         // system | light | dark
+    theme: 'dark',           // system | light | dark
     text: 'normal',          // normal | large
     refresh: 20,             // seconds between live polls
     mapStyle: 'detailed',    // Voyager: most place names of the keyless raster options
@@ -43,7 +43,7 @@ function commit() {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
-    /* quota or private mode — the app still works, it just forgets */
+    /* quota or private mode â€” the app still works, it just forgets */
   }
   listeners.forEach((fn) => fn(state));
 }
@@ -54,7 +54,7 @@ export function onChange(fn) { listeners.add(fn); return () => listeners.delete(
  * A local, random id that says "the same install" for crowd reports.
  *
  * The per-hour report limit and the 30-second undo both need to tell one rider from another. That
- * used to be a hash of the IP, which behind the proxy is the same address for everybody — so the
+ * used to be a hash of the IP, which behind the proxy is the same address for everybody â€” so the
  * first person to report a bus silenced everyone else for an hour, and an undo could withdraw a
  * stranger's report.
  *
@@ -134,7 +134,7 @@ export const recents = {
    * The buses this device keeps coming back to.
    *
    * Nearly half of all lookups in the app are the same handful of plates, and people were
-   * re-typing them daily — so the phone already knows the answer. Kept entirely on-device:
+   * re-typing them daily â€” so the phone already knows the answer. Kept entirely on-device:
    * "which buses does this person follow" is a commute and a timetable, and the server has no
    * business holding it just to save someone a few keystrokes.
    */
@@ -185,3 +185,4 @@ export function clearAll() {
   state = structuredClone(DEFAULTS);
   commit();
 }
+

@@ -122,15 +122,35 @@ export function refreshTiles() {
   maps.forEach(paint);
 }
 
-export const busIcon = (heading = null) => L.divIcon({
-  className: '',
-  html: `<div class="bus-pin${Number.isFinite(heading) ? ' directional' : ''}"${
-    Number.isFinite(heading) ? ` style="--bus-heading:${heading}deg"` : ''
-  }>${icon('bus', 'i i-sm')}</div>`,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
-  tooltipAnchor: [0, -18],
-});
+export const busIcon = (heading = null) => {
+  const hasHeading = Number.isFinite(heading);
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const direction = hasHeading ? dirs[Math.round(heading / 45) % 8] : '';
+
+  return L.divIcon({
+    className: '',
+    html: `
+      <div
+        class="bus-pin${hasHeading ? ' directional' : ''}"
+        ${hasHeading ? `style="--bus-heading:${heading}deg"` : ''}
+        aria-label="${hasHeading ? `Bus heading ${direction}, ${heading} degrees` : 'Bus location'}"
+      >
+        ${hasHeading ? `
+          <span class="bus-heading" aria-hidden="true">
+            <span class="bus-heading-arrow"></span>
+          </span>
+          <span class="bus-direction">${direction}</span>
+        ` : ''}
+        <span class="bus-body">
+          ${icon('bus', 'i i-sm')}
+        </span>
+      </div>
+    `,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+    tooltipAnchor: [0, -24],
+  });
+};
 
 /**
  * A stop on the route. `at` marks the one the bus is standing at right now, which is the single
@@ -373,5 +393,6 @@ export function brandColour() {
 export function mutedColour() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim() || '#78839a';
 }
+
 
 

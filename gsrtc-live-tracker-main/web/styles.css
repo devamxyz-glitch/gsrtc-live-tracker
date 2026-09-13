@@ -1,4 +1,4 @@
-/* ST Tracker — design system.
+﻿/* ST Tracker â€” design system.
    Navy is the action colour, saffron the accent, emerald reserved for "this is live".
    Everything is token-driven so light/dark stay in sync. No icon fonts, no emoji. */
 
@@ -71,7 +71,7 @@
 
   /* Every size in this file is calc(Npx * var(--step)), so this one number is the whole type
      scale. The original default of 1 put body text at 15px, which is too small to read at a
-     bus stop in daylight — and left form inputs under 16px, which makes iOS zoom the page
+     bus stop in daylight â€” and left form inputs under 16px, which makes iOS zoom the page
      every time one is focused. */
   --step: 1.07;
 }
@@ -82,7 +82,7 @@
  * The first version tinted every surface, every line and even the body text toward the brand
  * blue (~215deg across the board), which read as "the whole app is blue" rather than "the app
  * is dark". Blue now appears only where it means something: the action colour and the map.
- * The greys carry the faintest cool lean — pure neutral grey looks dead on an OLED screen —
+ * The greys carry the faintest cool lean â€” pure neutral grey looks dead on an OLED screen â€”
  * but nowhere near enough to register as a colour.
  */
 [data-theme="dark"] {
@@ -127,7 +127,7 @@
 * { box-sizing: border-box; }
 
 /* The `hidden` attribute only sets `display: none` at UA-stylesheet strength, so any explicit
-   display — `.row { display: flex }`, for one — silently overrides it and the element stays on
+   display â€” `.row { display: flex }`, for one â€” silently overrides it and the element stays on
    screen with no sign anything is wrong. Make the attribute mean what it says. */
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
@@ -204,7 +204,7 @@ svg.i-lg { width: 24px; height: 24px; }
  */
 .flow > * + * { margin-top: var(--space-2); }
 /* A paragraph's own browser margin competes with the container's rhythm and produces a
-   different gap above and below it than between any other pair — the container owns spacing
+   different gap above and below it than between any other pair â€” the container owns spacing
    here, so the component gives it up. */
 .flow > p { margin: 0; }
 /* A form's submit sits further from its input than two paragraphs sit from each other; at the
@@ -224,7 +224,7 @@ svg.i-lg { width: 24px; height: 24px; }
   text-transform: uppercase; color: var(--ink-3);
   margin: 0 2px;
 }
-/* A state, not an action — it should not look tappable. */
+/* A state, not an action â€” it should not look tappable. */
 .sec-title .state {
   margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 600;
   color: var(--live); display: inline-flex; align-items: center; gap: 5px;
@@ -245,7 +245,7 @@ svg.i-lg { width: 24px; height: 24px; }
 /* ---------------------------------------------------------------- controls */
 /*
  * Leaflet positions its own map container, so without an explicit layer a map declared after a
- * field would paint over that field's dropdown. Fields sit above the map — and the field the
+ * field would paint over that field's dropdown. Fields sit above the map â€” and the field the
  * user is actually typing in is lifted above its *sibling* fields too, otherwise the "To" input
  * below "From" would cover the list you are trying to pick from.
  */
@@ -366,12 +366,12 @@ select.input {
 .tile .meta {
   font-size: calc(12.5px * var(--step)); color: var(--ink-2); margin-top: 3px;
   /* Wraps rather than truncates. On a 375px screen this line has about 150px and wants nearly
-     300 — so a rider was shown "Express · 1h 3…" and never the duration, the distance or the
+     300 â€” so a rider was shown "Express Â· 1h 3â€¦" and never the duration, the distance or the
      seat count at all. Two short lines beat one cut in half, and it keeps the crowd chip from
      buying its place at the expense of the facts beside it.
      Left inline rather than made a flex row: the separators are bare text nodes, and each one
      would become its own flex item with its own gap. */
-  /* Normal wrapping, no forced mid-word breaks — those split "56 seats" across two lines. */
+  /* Normal wrapping, no forced mid-word breaks â€” those split "56 seats" across two lines. */
   white-space: normal;
 }
 .tile .end { text-align: right; align-items: center; }
@@ -503,8 +503,8 @@ select.input {
   font-size: calc(11.5px * var(--step)); padding: 3px 7px;
 }
 .map-tip::before { display: none; }
-/* The two stop names that bracket the bus. Quieter than the bus's own label — they are context,
-   not the subject — and non-interactive so they never eat a tap meant for the map. */
+/* The two stop names that bracket the bus. Quieter than the bus's own label â€” they are context,
+   not the subject â€” and non-interactive so they never eat a tap meant for the map. */
 .map-tip.stop-tip {
   background: color-mix(in srgb, var(--surface) 88%, transparent);
   color: var(--ink-2); font-weight: 600;
@@ -588,7 +588,7 @@ select.input {
 /* Padding helpers so screens stop carrying inline styles for the same three cases. */
 .pad-3 { padding: var(--space-3); }
 /* A note tucked between two bordered rows of the track card. It used to zero its top padding
-   entirely, which left it flush against the metrics row above with the two touching — the row
+   entirely, which left it flush against the metrics row above with the two touching â€” the row
    has a border and no bottom padding of its own, so there was nothing else to separate them. */
 .pad-tight { padding-top: var(--space-2); padding-bottom: var(--space-2); }
 /* A chip row inside a card or sheet should respect that container, not bleed past it. */
@@ -609,7 +609,7 @@ select.input {
 /* ---------------------------------------------------------------- walkthrough */
 #tour { position: fixed; inset: 0; z-index: calc(var(--z-toast) + 10); }
 .tour-scrim { position: absolute; inset: 0; background: rgba(6, 10, 18, .62); }
-/* With a target highlighted, the ring's shadow does the dimming — two overlapping scrims
+/* With a target highlighted, the ring's shadow does the dimming â€” two overlapping scrims
    would double the darkness. */
 #tour:has(.tour-ring:not([hidden])) .tour-scrim { background: transparent; }
 /* The spotlight is a ring plus an enormous shadow, which dims everything except the target
@@ -643,7 +643,7 @@ body.tour-open { overflow: hidden; }
 
 /* ---------------------------------------------------------------- permission primer */
 .perm-sheet { padding: var(--space-3); }
-/* `.sheet-body` deliberately carries no padding — a map or a full-bleed list has to reach the
+/* `.sheet-body` deliberately carries no padding â€” a map or a full-bleed list has to reach the
    edges. Anything text-shaped opts in to gutters instead of running into the screen edge. */
 .sheet-pad { padding: var(--space-3); }
 .perm-intro {
@@ -693,7 +693,7 @@ body.tour-open { overflow: hidden; }
   font-size: calc(12.5px * var(--step)); color: var(--ink-3);
 }
 .depot-pin { color: var(--ink-3); }
-/* Numbers sit under the name, never beside it — two long ones used to crush it to nothing. */
+/* Numbers sit under the name, never beside it â€” two long ones used to crush it to nothing. */
 .depot-calls { display: flex; gap: 8px; flex-wrap: wrap; padding-left: 48px; }
 .depot-call {
   text-decoration: none; white-space: nowrap; font-weight: 600;
@@ -725,7 +725,7 @@ body.tour-open { overflow: hidden; }
 
 /* Occupancy slider.
    One signed axis: seats going spare to the left, people standing to the right, zero in the
-   middle. One quantity, one control — a bus does not have spare seats and standing passengers
+   middle. One quantity, one control â€” a bus does not have spare seats and standing passengers
    at once, so making the rider pick which question to answer first would be inventing a step.
 
    The number leads, not the track. The whole reason this replaced a five-rung scale is that a
@@ -745,13 +745,13 @@ body.tour-open { overflow: hidden; }
 .occ-count { margin-left: auto; font-size: calc(11.5px * var(--step)); color: var(--ink-3); }
 
 /* The bar owns both the track and the input, and is exactly the track's height. The slider was
-   previously centred with `top: 50%` against the whole `.occ` block — which includes the
-   headline number above it — so the thumb floated well above the line it is supposed to ride. */
+   previously centred with `top: 50%` against the whole `.occ` block â€” which includes the
+   headline number above it â€” so the thumb floated well above the line it is supposed to ride. */
 .occ-bar { position: relative; height: 12px; }
 /* Inset by half the thumb so positions inside the track line up with the thumb itself. A range
    thumb's centre travels from thumbWidth/2 to width - thumbWidth/2, never 0% to 100%, so a zero
    marker placed at a raw percentage of the full width sits beside the thumb rather than under
-   it — which is how "full" ended up left of the dot. The input keeps the full width; the track
+   it â€” which is how "full" ended up left of the dot. The input keeps the full width; the track
    is inset to match where the thumb can actually go. */
 .occ-track {
   position: absolute; left: 13px; right: 13px; top: 0;
@@ -805,12 +805,12 @@ body.tour-open { overflow: hidden; }
   font-size: calc(10.5px * var(--step)); color: var(--ink-3);
   margin-left: 13px; margin-right: 13px;   /* same inset, so "full" sits under the zero mark */
 }
-/* Aligned to the real zero (40 of the 70 units), not to the middle of the row — the scale is
+/* Aligned to the real zero (40 of the 70 units), not to the middle of the row â€” the scale is
    asymmetric, so a label centred by geometry points at the wrong place on the track. */
 .occ-mid { position: absolute; left: calc(40 / 70 * 100%); transform: translateX(-50%); }
 .occ-ends { position: relative; }
 
-/* Undo. Shown with its countdown running rather than vanishing on a hidden schedule — an
+/* Undo. Shown with its countdown running rather than vanishing on a hidden schedule â€” an
    option that disappears by itself reads as a glitch, one that visibly runs out reads as a rule. */
 .undo-report {
   display: inline-flex; align-items: center; gap: 6px;
@@ -831,7 +831,7 @@ body.tour-open { overflow: hidden; }
 }
 .cn-body .btn { margin-top: 4px; }
 .cn-count { font-size: calc(11.5px * var(--step)); opacity: .8; }
-/* Deliberately quiet. Clearing someone else's report is a correction, not a primary action —
+/* Deliberately quiet. Clearing someone else's report is a correction, not a primary action â€”
    it should be findable by anyone who knows it is wrong, and invisible to everyone else. */
 .cn-clear {
   margin-top: 6px; padding: 0; border: 0; background: none;
@@ -881,7 +881,7 @@ body.tour-open { overflow: hidden; }
 }
 .od .swap:active { transform: translateY(-50%) rotate(180deg); }
 /* The swap sits in the gap between the two fields, which is exactly where an open dropdown
-   starts — leaving a sliver of it poking out above the list. It is unreachable while a list
+   starts â€” leaving a sliver of it poking out above the list. It is unreachable while a list
    is open, so take it out of the way. */
 .od:has(.field.open) .swap { opacity: 0; pointer-events: none; }
 
@@ -925,7 +925,7 @@ body.tour-open { overflow: hidden; }
 .stop:hover .info { background: var(--surface-2); border-radius: var(--r-sm); }
 
 /* Service status.
-   Quiet when healthy on purpose — an indicator that shouts while everything is fine is one
+   Quiet when healthy on purpose â€” an indicator that shouts while everything is fine is one
    people stop reading, and then it cannot tell them anything on the day it matters. */
 .status-dot {
   display: inline-flex; align-items: center; gap: 8px;
@@ -947,7 +947,7 @@ body.tour-open { overflow: hidden; }
 
 /* One row per service, in the shape Uptime Kuma settled on: a percentage badge, the name, and
    the run of recent checks. The badge answers "is it reliable", the heartbeat answers "is it
-   failing right now" — and those need opposite reactions from someone deciding whether to keep
+   failing right now" â€” and those need opposite reactions from someone deciding whether to keep
    waiting at the stop, which is why a single average is not enough. */
 .svc-list { display: flex; flex-direction: column; }
 .svc {
@@ -996,7 +996,7 @@ body.tour-open { overflow: hidden; }
 .me-text { font-size: calc(12.5px * var(--step)); color: var(--ink-3); line-height: 1.4; }
 
 /* The status pill sits between the search box and the first section, and needs to belong to
-   neither — without its own space it reads as an attachment to the input above it. */
+   neither â€” without its own space it reads as an attachment to the input above it. */
 .status-dot { margin: var(--space-3) 0 var(--space-1); }
 
 /* The buses this phone keeps returning to. Weightier than a recent chip, because it is an
@@ -1025,7 +1025,7 @@ body.tour-open { overflow: hidden; }
 }
 .chip.removable .chip-x:active { color: var(--danger); }
 
-/* A bus stand. Deliberately small and quiet — there are hundreds of these on a corridor and
+/* A bus stand. Deliberately small and quiet â€” there are hundreds of these on a corridor and
    they are context for the bus, not the subject of the screen. Ringed rather than filled so it
    stays legible on both the pale Voyager tiles and dark satellite imagery. */
 .stand-pin {
@@ -1044,7 +1044,7 @@ body.tour-open { overflow: hidden; }
   box-shadow: 0 0 0 2px var(--brand-soft), 0 1px 4px rgba(0, 0, 0, .4);
 }
 
-/* Its label. Quieter and tighter than the bus's own — a stand name is there to orient you, so
+/* Its label. Quieter and tighter than the bus's own â€” a stand name is there to orient you, so
    it must not compete with the thing you are actually following. */
 .map-tip.stand-tip {
   background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -1056,7 +1056,7 @@ body.tour-open { overflow: hidden; }
   box-shadow: none;
   border: 1px solid var(--line);
 }
-/* Named out loud while the bus is there — it stops being background at that moment. */
+/* Named out loud while the bus is there â€” it stops being background at that moment. */
 .map-tip.stand-tip.near {
   background: var(--brand-soft);
   color: var(--brand-soft-ink);
@@ -1064,14 +1064,14 @@ body.tour-open { overflow: hidden; }
   font-weight: 700;
 }
 
-/* What riders said, on the departure list. Deliberately quiet — it sits on the meta line among
+/* What riders said, on the departure list. Deliberately quiet â€” it sits on the meta line among
    service type and duration, and shouting would make every row look like a warning. */
 .crowd-chip {
   display: inline-flex; align-items: center;
   padding: 1px 7px; border-radius: 999px;
   font-size: calc(10.5px * var(--step)); font-weight: 650;
   background: var(--surface-2); color: var(--ink-2);
-  /* Its own separator — a "·" after a pill just dangles at the end of a line when this wraps. */
+  /* Its own separator â€” a "Â·" after a pill just dangles at the end of a line when this wraps. */
   margin-right: 5px;
 }
 .crowd-chip.lvl-1, .crowd-chip.lvl-2 { background: var(--live-soft); color: var(--live); }
@@ -1080,7 +1080,7 @@ body.tour-open { overflow: hidden; }
 .crowd-chip.gone { background: var(--danger-soft); color: var(--danger); }
 
 /* Occupancy at rest: what riders said, and a button to say something. The slider only appears
-   on a deliberate tap — permanently on screen it was being dragged while scrolling past. */
+   on a deliberate tap â€” permanently on screen it was being dragged while scrolling past. */
 .occ-closed {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin-top: 2px;
@@ -1187,7 +1187,7 @@ body.tour-open { overflow: hidden; }
 
 @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .skel-stack { display: grid; gap: var(--space-2); }
-/* Matched to a real departure row, so the layout does not jump when the data lands — a
+/* Matched to a real departure row, so the layout does not jump when the data lands â€” a
    placeholder taller than the thing it stands in for is its own small lie. */
 .skel.tile-skel { height: 52px; border-radius: var(--r); }
 
@@ -1242,7 +1242,7 @@ body.tour-open { overflow: hidden; }
   flex: none; width: 34px; height: 34px; margin: -4px -6px 0 0; position: relative;
 }
 /* Stays 34px to sit properly in the banner's corner, but takes taps across the full 44. It is
-   the only control in that corner, so the overflow cannot steal one from anything else — and a
+   the only control in that corner, so the overflow cannot steal one from anything else â€” and a
    stray dismiss costs the rider the install prompt for the next three weeks. */
 .install-card .ib-close::after { content: ''; position: absolute; inset: -5px; }
 
@@ -1310,7 +1310,7 @@ body.tour-open { overflow: hidden; }
    silently when an option is added. Wrapping is driven by the control's own min-content width,
    so wider screens keep the single-line layout. */
 .list-row.wraps { flex-wrap: wrap; }
-/* A width, not `flex: 1 1 auto` — an auto-basis control shrinks below its content and overflows
+/* A width, not `flex: 1 1 auto` â€” an auto-basis control shrinks below its content and overflows
    the row rather than wrapping, which is the failure this rule exists to prevent. */
 @media (max-width: 520px) {
   .list-row.wraps .seg { flex: 1 0 100%; margin-top: var(--space-2); }
@@ -1352,7 +1352,7 @@ body.tour-open { overflow: hidden; }
    it without three screens having to remember to opt in. The effect is opacity-only and short:
    these lists re-render on their own refresh, and a list that visibly slid back into place
    every sixty seconds would read as a redraw rather than as polish. Past eight rows the delay
-   stops climbing — later rows would be waiting on an animation instead of being read. */
+   stops climbing â€” later rows would be waiting on an animation instead of being read. */
 .tile {
   animation: fade-in .22s ease both;
   animation-delay: calc(var(--d, 8) * 26ms);
@@ -1413,7 +1413,6 @@ body.tour-open { overflow: hidden; }
   .btn:active, .chip:active, .tile:active, .list-row:active,
   .iconbtn:active, .seg button:active, .ac-item:active { transform: none; }
 }
-@'
 /* Devam Namera premium brand layer */
 .s-founder {
   margin-top: 10px;
@@ -1508,4 +1507,563 @@ body.tour-open { overflow: hidden; }
   }
 }
 '@ | Add-Content ".\web\styles.css" -Encoding UTF8
+/* ============================================================
+   ST TRACKER — PREMIUM EXPERIENCE UI
+   ============================================================ */
 
+:root {
+  --premium-gold: #f2b45b;
+  --premium-gold-2: #ffd58f;
+  --premium-green: #29d391;
+  --premium-blue: #7ea6f0;
+  --premium-bg: #090b0f;
+  --premium-surface: rgba(20, 23, 29, .92);
+  --premium-surface-2: rgba(25, 29, 36, .94);
+  --premium-border: rgba(255,255,255,.085);
+  --premium-border-gold: rgba(242,180,91,.28);
+  --premium-shadow:
+    0 20px 60px rgba(0,0,0,.34),
+    0 2px 8px rgba(0,0,0,.24);
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(900px 520px at 50% -180px, rgba(242,180,91,.065), transparent 68%),
+    radial-gradient(700px 420px at 100% 12%, rgba(126,166,240,.055), transparent 70%),
+    linear-gradient(180deg, #090b0f 0%, #0d1015 50%, #090b0f 100%);
+}
+
+/* ---------- header ---------- */
+
+[data-theme="dark"] .app-header {
+  background: rgba(10, 12, 16, .78);
+  border-bottom-color: rgba(255,255,255,.07);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+
+[data-theme="dark"] .app-header h1 {
+  letter-spacing: -.35px;
+}
+
+[data-theme="dark"] .app-header .mark {
+  box-shadow:
+    0 0 0 1px rgba(242,180,91,.14),
+    0 8px 24px rgba(0,0,0,.35);
+}
+
+/* ---------- cards ---------- */
+
+[data-theme="dark"] .card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(26,30,37,.97),
+      rgba(17,20,25,.96)
+    );
+  border-color: var(--premium-border);
+  box-shadow: var(--premium-shadow);
+}
+
+[data-theme="dark"] .tile {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25,29,36,.95),
+      rgba(18,21,27,.95)
+    );
+  border-color: var(--premium-border);
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+[data-theme="dark"] .tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242,180,91,.20);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.26),
+    0 0 0 1px rgba(242,180,91,.04);
+}
+
+/* ---------- section labels ---------- */
+
+[data-theme="dark"] .sec-title {
+  color: #777f8c;
+  letter-spacing: 1px;
+}
+
+[data-theme="dark"] .sec-title .state {
+  color: var(--premium-green);
+}
+
+/* ---------- inputs ---------- */
+
+[data-theme="dark"] .input {
+  background:
+    linear-gradient(180deg, rgba(30,34,42,.96), rgba(21,24,30,.96));
+  border-color: rgba(255,255,255,.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 8px 18px rgba(0,0,0,.12);
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .18s ease;
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: rgba(242,180,91,.42);
+  box-shadow:
+    0 0 0 4px rgba(242,180,91,.08),
+    0 10px 26px rgba(0,0,0,.20);
+  transform: translateY(-1px);
+}
+
+/* ---------- buttons ---------- */
+
+[data-theme="dark"] .btn {
+  background:
+    linear-gradient(135deg, #f4bd67 0%, #e89b38 100%);
+  color: #171109;
+  border-color: rgba(255,214,145,.18);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.26),
+    0 0 0 1px rgba(242,180,91,.06);
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .2s ease,
+    filter .2s ease;
+}
+
+[data-theme="dark"] .btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 32px rgba(0,0,0,.30),
+    0 0 26px rgba(242,180,91,.11);
+}
+
+[data-theme="dark"] .btn:active {
+  transform: translateY(0) scale(.985);
+}
+
+[data-theme="dark"] .btn.ghost,
+[data-theme="dark"] .btn.quiet {
+  background: rgba(255,255,255,.035);
+  color: var(--ink);
+  border-color: rgba(255,255,255,.09);
+}
+
+[data-theme="dark"] .btn.ghost:hover {
+  background: rgba(255,255,255,.065);
+  border-color: rgba(242,180,91,.18);
+}
+
+/* ---------- chips ---------- */
+
+[data-theme="dark"] .chip {
+  background: rgba(255,255,255,.035);
+  border-color: rgba(255,255,255,.08);
+  transition:
+    transform .18s ease,
+    background .2s ease,
+    border-color .2s ease;
+}
+
+[data-theme="dark"] .chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(242,180,91,.18);
+}
+
+[data-theme="dark"] .chip.on {
+  background:
+    linear-gradient(135deg, rgba(242,180,91,.22), rgba(232,155,56,.12));
+  border-color: rgba(242,180,91,.34);
+  color: var(--premium-gold-2);
+  box-shadow: 0 8px 20px rgba(0,0,0,.16);
+}
+
+/* ---------- map ---------- */
+
+[data-theme="dark"] .map-wrap,
+[data-theme="dark"] .map {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .leaflet-container {
+  background: #11151b;
+}
+
+[data-theme="dark"] .leaflet-control-zoom a {
+  background: rgba(20,23,29,.88) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  color: #e6e8eb !important;
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .map-fabs .iconbtn {
+  background: rgba(18,21,27,.88);
+  border-color: rgba(255,255,255,.09);
+  box-shadow: 0 10px 25px rgba(0,0,0,.28);
+  backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .map-fabs .iconbtn:hover {
+  border-color: rgba(242,180,91,.20);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.30),
+    0 0 18px rgba(242,180,91,.08);
+}
+
+/* ---------- premium bus marker ---------- */
+
+.bus-pin {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #ffe1a9 0%, #f4ba62 26%, #df9130 100%);
+  color: #171109;
+  border: 2px solid rgba(255,231,190,.92);
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.36),
+    0 0 0 4px rgba(242,180,91,.10),
+    0 0 26px rgba(242,180,91,.14);
+  isolation: isolate;
+}
+
+.bus-pin .bus-body {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.90);
+  color: #151515;
+  box-shadow: 0 3px 8px rgba(0,0,0,.18);
+}
+
+.bus-pin .bus-body .i {
+  width: 18px;
+  height: 18px;
+}
+
+.bus-pin .bus-heading {
+  position: absolute;
+  inset: -11px;
+  z-index: 4;
+  pointer-events: none;
+  transition: transform .45s cubic-bezier(.2,.8,.2,1);
+}
+
+.bus-heading-arrow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 12px solid var(--premium-green);
+  filter:
+    drop-shadow(0 0 5px rgba(41,211,145,.50));
+}
+
+.bus-direction {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  z-index: 5;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #0e1317;
+  border: 1px solid rgba(41,211,145,.40);
+  color: #79efbd;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .2px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.30);
+}
+
+.bus-pin::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1px solid rgba(41,211,145,.55);
+  animation: st-live-pulse 2.1s cubic-bezier(.2,.7,.2,1) infinite;
+}
+
+.bus-pin::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.16), transparent 72%);
+  pointer-events: none;
+}
+
+@keyframes st-live-pulse {
+  0% {
+    transform: scale(.80);
+    opacity: .70;
+  }
+  70% {
+    transform: scale(1.30);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.30);
+    opacity: 0;
+  }
+}
+
+/* ---------- live intelligence ---------- */
+
+.st-live-intel {
+  position: relative;
+  overflow: hidden !important;
+  padding: 15px !important;
+  background:
+    radial-gradient(
+      120% 120% at 0% 0%,
+      rgba(242,180,91,.075),
+      transparent 48%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(24,28,35,.98),
+      rgba(14,17,21,.98)
+    ) !important;
+  border-color: var(--premium-border-gold) !important;
+}
+
+.st-live-intel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(242,180,91,.65),
+      rgba(41,211,145,.55),
+      transparent
+    );
+  opacity: .85;
+}
+
+.st-live-intel > .sec-title {
+  color: #f1f2f4;
+  letter-spacing: .5px;
+  text-transform: none;
+  font-size: 14px;
+}
+
+.st-live-intel > .sec-title::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--premium-green);
+  box-shadow: 0 0 12px rgba(41,211,145,.50);
+  animation: st-live-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes st-live-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .45; transform: scale(.82); }
+}
+
+.st-intel-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+}
+
+.st-intel-grid .kv {
+  position: relative;
+  min-height: 62px;
+  padding: 10px 11px;
+  border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.025);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+}
+
+.st-intel-grid .kv:hover {
+  transform: translateY(-1px);
+  border-color: rgba(242,180,91,.16);
+  background: rgba(255,255,255,.04);
+}
+
+.st-intel-grid .k {
+  display: block;
+  margin-bottom: 3px;
+  color: #727986;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+}
+
+.st-intel-grid .v {
+  display: block;
+  color: #f0f1f3;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Direction deserves emphasis. The direction text itself remains upright. */
+.st-intel-grid .kv:nth-child(5) .v,
+.st-intel-grid .kv:nth-child(6) .v {
+  color: var(--premium-green);
+}
+
+/* ---------- screen transitions ---------- */
+
+.screen.on {
+  animation:
+    st-screen-in .38s cubic-bezier(.18,.8,.22,1) both;
+}
+
+@keyframes st-screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.992);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.screen.on .card:nth-child(1) { animation-delay: .02s; }
+.screen.on .card:nth-child(2) { animation-delay: .05s; }
+.screen.on .card:nth-child(3) { animation-delay: .08s; }
+
+/* ---------- bottom navigation ---------- */
+
+[data-theme="dark"] .tabbar {
+  background: rgba(10,12,16,.84);
+  border-top-color: rgba(255,255,255,.075);
+  box-shadow:
+    0 -14px 34px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.025);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+
+[data-theme="dark"] .tabbar button {
+  transition:
+    transform .18s ease,
+    color .2s ease,
+    background .2s ease;
+}
+
+[data-theme="dark"] .tabbar button:hover {
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .tabbar button.on {
+  color: var(--premium-gold-2);
+}
+
+[data-theme="dark"] .tabbar button.on::before {
+  content: '';
+  position: absolute;
+  width: 48px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(242,180,91,.09);
+  box-shadow: 0 0 24px rgba(242,180,91,.07);
+}
+
+/* ---------- general micro motion ---------- */
+
+[data-theme="dark"] .iconbtn,
+[data-theme="dark"] .chip,
+[data-theme="dark"] .btn,
+[data-theme="dark"] .tile {
+  will-change: transform;
+}
+
+.metric-changed {
+  animation:
+    st-value-pop .45s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes st-value-pop {
+  0% {
+    opacity: .45;
+    transform: translateY(3px) scale(.985);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- mobile polish ---------- */
+
+@media (max-width: 560px) {
+  .wrap {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .card {
+    border-radius: 19px;
+  }
+
+  .st-intel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .st-intel-grid .kv {
+    min-height: 58px;
+    padding: 9px 10px;
+  }
+
+  .st-intel-grid .v {
+    font-size: 12.5px;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .screen.on,
+  .metric-changed,
+  .bus-pin::after,
+  .bus-pin .bus-heading,
+  .st-live-intel > .sec-title::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
