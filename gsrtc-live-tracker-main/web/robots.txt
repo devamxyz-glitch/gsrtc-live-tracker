@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gsrtc-live-tracker.onrender.com/sitemap.xml
