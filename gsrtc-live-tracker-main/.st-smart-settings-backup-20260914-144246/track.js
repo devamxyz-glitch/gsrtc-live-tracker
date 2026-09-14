@@ -570,7 +570,6 @@ function smartRouteProgress(){
 }
 
 function smartSafetyBlock(){
-  if(store.settings.get().smartSafety === false)return '';
   if(!plate||!lastRow)return'';
 
   if(!stops?.length){
@@ -1702,7 +1701,6 @@ async function armAlert({ lat, lng, label, radiusKm = 1 }) {
 export function currentPlate() { return plate; }
 export function currentTrip() { return trip; }
 export function targetStopIndex() { return targetIndex; }
-
 
 
 

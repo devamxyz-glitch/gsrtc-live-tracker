@@ -14,7 +14,6 @@ const DEFAULTS = {
     refresh: 20,             // seconds between live polls
     mapStyle: 'detailed',    // Voyager: most place names of the keyless raster options
     stats: true,             // anonymous feature counters; see stats.js and Settings
-    smartSafety: true,
   },
   commutes: [],              // { id, fromId, fromName, fromGu, toId, toName, toGu }
   buses: [],                 // { plate, depot, division, label }
@@ -191,7 +190,6 @@ export function clearAll() {
   state = structuredClone(DEFAULTS);
   commit();
 }
-
 
 
 

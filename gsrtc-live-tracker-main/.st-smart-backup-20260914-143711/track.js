@@ -291,7 +291,6 @@ export function start(nextPlate, context = null) {
     renderFabs();   // a new bus has no position yet, so nothing to recentre on
     trailLine?.remove(); trailLine = null;
     stops = []; targetIndex = -1; tripFetchedAt = 0; lastRow = null; crowd = null;
-    smartTargetIndex = -1;
     occupancyOpen = false;
     clearUndo();
     roadIndex = null;
@@ -504,225 +503,6 @@ const shorten = (name, max = 26) => {
 const formatMinutes = (m) => (m <= 0 ? t('arrivingNow')
   : m < 60 ? t('minutesShort', { n: m })
     : t('hoursShort', { h: Math.floor(m / 60), m: m % 60 }));
-
-/* =========================================================
-   ST SMART SAFETY INTELLIGENCE
-   Live ETA + walking time + boarding safety buffer
-   ========================================================= */
-
-let smartTargetIndex=-1;
-const SMART_BOARDING_MARGIN=5;
-const SMART_WALKING_KMH=4.5;
-
-function smartEtaForStop(index){
-  if(!stops?.[index]) return null;
-  const located=routeFix();
-  if(!located) return null;
-  return insight.etaToStop(stops,index,{
-    busKm:located.km,
-    delay:currentDelay(located),
-    speedKmh:insight.speedFrom(fixes).kmh,
-  });
-}
-
-function smartWalkMinutes(stop){
-  if(!myPos||!stop) return null;
-  const lat=Number(stop.lat),lng=Number(stop.lng);
-  if(!Number.isFinite(lat)||!Number.isFinite(lng)) return null;
-  const km=haversineKm(myPos,{lat,lng});
-  return Math.max(1,Math.ceil((km/SMART_WALKING_KMH)*60));
-}
-
-function smartStatus(buffer){
-  if(buffer>=10)return{cls:'safe',title:'Comfortable buffer'};
-  if(buffer>=5)return{cls:'tight',title:'Tight buffer'};
-  return{cls:'danger',title:'Leave now'};
-}
-
-function smartFreshnessLabel(fresh){
-  if(fresh==='live')return'Live GPS';
-  if(fresh==='stale')return'GPS data is getting old';
-  if(fresh==='dead')return'GPS data is stale';
-  return'GPS unavailable';
-}
-
-function smartBusState(eta,movement,fresh){
-  if(fresh==='dead'||fresh==='none')return'Uncertain';
-  if(eta?.minutes!=null&&eta.minutes<=3)return'Approaching';
-  if(movement?.state==='stopped')return'Stopped';
-  if(movement?.state==='moving')return'Moving';
-  return'Monitoring';
-}
-
-function smartRouteProgress(){
-  const located=routeFix();
-  if(!located||!stops?.length)return null;
-  const next=located.nextIndex>=0
-    ?located.nextIndex
-    :insight.nextStopIndex(stops,located.km);
-  if(next<0)return null;
-  const reached=Math.max(0,Math.min(stops.length,next));
-  return{
-    reached,
-    total:stops.length,
-    percent:Math.round((reached/stops.length)*100),
-  };
-}
-
-function smartSafetyBlock(){
-  if(store.settings.get().smartSafety === false)return '';
-  if(!plate||!lastRow)return'';
-
-  if(!stops?.length){
-    return`
-      <section class="st-smart-card">
-        <div class="st-smart-head">
-          <div>
-            <div class="st-smart-kicker">SMART SAFETY</div>
-            <div class="st-smart-title">Catchability intelligence</div>
-          </div>
-          <span class="st-smart-pill neutral">WAITING</span>
-        </div>
-        <div class="st-smart-empty">Route stop data is not available yet.</div>
-      </section>
-    `;
-  }
-
-  if(smartTargetIndex<0||!stops[smartTargetIndex]){
-    const located=routeFix();
-    smartTargetIndex=targetIndex>=0
-      ?targetIndex
-      :Math.max(0,insight.nextStopIndex(stops,located?.km));
-  }
-
-  const selected=stops[smartTargetIndex];
-  const selectedName=selected?.name||selected?.nameGu||'Selected stop';
-  const eta=smartEtaForStop(smartTargetIndex);
-  const fresh=insight.freshness(fixes[fixes.length-1]?.at);
-  const movement=insight.movementFrom(fixes);
-  const walk=smartWalkMinutes(selected);
-
-  let buffer=null;
-  if(eta?.minutes!=null&&walk!=null){
-    buffer=eta.minutes-walk-SMART_BOARDING_MARGIN;
-  }
-
-  const status=buffer==null?null:smartStatus(buffer);
-  const state=smartBusState(eta,movement,fresh);
-  const progress=smartRouteProgress();
-
-  const options=stops.map((stop,index)=>{
-    const name=stop?.name||stop?.nameGu||`Stop ${index+1}`;
-    return`
-      <option value="${index}" ${index===smartTargetIndex?'selected':''}>
-        ${esc(localName(clean(name),clean(stop?.nameGu||'')))}
-      </option>
-    `;
-  }).join('');
-
-  let result;
-
-  if(!eta||eta.minutes==null){
-    result=`
-      <div class="st-smart-result neutral">
-        <strong>ETA unavailable</strong>
-        <span>Live route data is not reliable enough to calculate a safe arrival plan.</span>
-      </div>
-    `;
-  }else if(walk==null){
-    result=`
-      <div class="st-smart-result neutral">
-        <strong>${esc(formatMinutes(eta.minutes))} to ${esc(shorten(clean(selectedName),30))}</strong>
-        <span>Enable your location to calculate walking time and the real safety buffer.</span>
-      </div>
-    `;
-  }else{
-    result=`
-      <div class="st-smart-result ${status.cls}">
-        <div class="st-smart-result-main">
-          <strong>${esc(status.title)}</strong>
-          <b>${buffer>=0?`${buffer} min`:`${Math.abs(buffer)} min late`}</b>
-        </div>
-        <span>
-          Bus ${formatMinutes(eta.minutes)} ·
-          Walk ${walk} min ·
-          Boarding margin ${SMART_BOARDING_MARGIN} min
-        </span>
-      </div>
-    `;
-  }
-
-  return`
-    <section class="st-smart-card" id="st-smart-card">
-      <div class="st-smart-head">
-        <div>
-          <div class="st-smart-kicker">ST SMART SAFETY</div>
-          <div class="st-smart-title">Can you catch this bus?</div>
-        </div>
-        <span class="st-smart-pill ${fresh==='live'?'live':'neutral'}">${esc(state)}</span>
-      </div>
-
-      <div class="st-smart-selector">
-        <label>YOUR STOP</label>
-        <select id="st-smart-stop">${options}</select>
-      </div>
-
-      ${result}
-
-      <div class="st-smart-stats">
-        <div>
-          <span>BUS ETA</span>
-          <strong>${eta?.minutes!=null?esc(formatMinutes(eta.minutes)):'—'}</strong>
-        </div>
-        <div>
-          <span>YOUR WALK</span>
-          <strong>${walk!=null?`${walk} min`:'—'}</strong>
-        </div>
-        <div>
-          <span>GPS</span>
-          <strong>${esc(smartFreshnessLabel(fresh))}</strong>
-        </div>
-      </div>
-
-      ${progress?`
-        <div class="st-smart-progress">
-          <div class="st-smart-progress-top">
-            <span>ROUTE PROGRESS</span>
-            <strong>${progress.reached} / ${progress.total} stops</strong>
-          </div>
-          <div class="st-smart-progress-track">
-            <span style="width:${progress.percent}%"></span>
-          </div>
-        </div>
-      `:''}
-
-      ${buffer!=null?`
-        <div class="st-smart-explain">
-          ${
-            buffer>=10
-              ?'You have a comfortable boarding window.'
-              :buffer>=5
-                ?'You can catch it, but avoid unnecessary delays.'
-                :'Your current walking time leaves too little boarding margin.'
-          }
-        </div>
-      `:''}
-    </section>
-  `;
-}
-
-function bindSmartSafety(){
-  const root=document.getElementById('st-smart-card');
-  if(!root||root.dataset.bound==='1')return;
-  root.dataset.bound='1';
-
-  root.addEventListener('change',event=>{
-    if(event.target?.id!=='st-smart-stop')return;
-    smartTargetIndex=Number(event.target.value);
-    targetIndex=smartTargetIndex;
-    render(lastRow,fixes[fixes.length-1]||null);
-  });
-}
 
 /* ------------------------------------------------------------------ map */
 
@@ -1213,10 +993,8 @@ function render(row, pos) {
           (saved ? iconFilled : icon)('star', 'i i-sm')}${esc(saved ? t('savedBus') : t('saveBus'))}</button>
         <button class="btn ghost" data-act="share">${icon('share', 'i i-sm')}${esc(t('shareLive'))}</button>
        </div>`
-    + smartSafetyBlock()
     + crowdBlock();
   renderChips();
-  bindSmartSafety();
 }
 
 /**
@@ -1702,8 +1480,6 @@ async function armAlert({ lat, lng, label, radiusKm = 1 }) {
 export function currentPlate() { return plate; }
 export function currentTrip() { return trip; }
 export function targetStopIndex() { return targetIndex; }
-
-
 
 
 

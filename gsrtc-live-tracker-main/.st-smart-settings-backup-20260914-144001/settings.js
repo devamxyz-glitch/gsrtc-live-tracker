@@ -1,4 +1,4 @@
-﻿/* Settings, plus the part every transit app should have and most do not:
+/* Settings, plus the part every transit app should have and most do not:
    a plain statement of where the data comes from and what stays on your device. */
 
 import { api } from './api.js';
@@ -45,7 +45,7 @@ function render() {
       <div class="list-row">
         <span class="row-glyph">${icon('globe')}</span>
         <span class="lbl">${esc(t('language'))}</span>
-        ${seg('lang', [['en', 'English'], ['gu', 'àª—à«àªœàª°àª¾àª¤à«€']], getLang())}
+        ${seg('lang', [['en', 'English'], ['gu', 'ગુજરાતી']], getLang())}
       </div>
       <div class="list-row">
         <span class="row-glyph">${icon(s.theme === 'dark' ? 'moon' : s.theme === 'light' ? 'sun' : 'monitor')}</span>
@@ -57,14 +57,7 @@ function render() {
         <span class="lbl">${esc(t('textSize'))}</span>
         ${seg('text', [['normal', t('textNormal')], ['large', t('textLarge')]], s.text)}
       </div>
-            <div class="list-row st-setting-smart-safety">
-        <span class="row-glyph">${icon('shield')}</span>
-        <span class="lbl">Smart Safety
-          <span class="hint">Show bus catch-time and boarding guidance</span>
-        </span>
-        ${seg('smartSafety', [['on', 'On'], ['off', 'Off']], s.smartSafety === false ? 'off' : 'on')}
-      </div>
-<div class="list-row">
+      <div class="list-row">
         <span class="row-glyph">${icon('refresh')}</span>
         <span class="lbl">${esc(t('refreshRate'))}</span>
         ${seg('refresh', [['10', t('seconds', { n: 10 })], ['20', t('seconds', { n: 20 })], ['60', t('seconds', { n: 60 })]], String(s.refresh))}
@@ -110,7 +103,7 @@ function render() {
           <span class="hint">${esc(t('permManageHint'))}</span></span>
         <span class="row-tail">${icon('right')}</span>
       </button>
-      ${/* Only when a notification could actually arrive â€” a button that cannot work is worse
+      ${/* Only when a notification could actually arrive — a button that cannot work is worse
             than no button. An arrival alert is not something you find out is broken until the
             bus has already gone past, so it is worth being able to check on purpose. */
       push.supported() && permissions.notificationState() === 'granted' ? `
@@ -258,7 +251,7 @@ function render() {
     </a>
 
     <div class="app-version">
-      <span>${esc(t('appName'))}${version ? ` Â· ${esc(t('version'))} ${esc(version)}` : ''}</span>
+      <span>${esc(t('appName'))}${version ? ` · ${esc(t('version'))} ${esc(version)}` : ''}</span>
       <span class="av-by">${esc(t('builtBy'))}
         <a href="https://shivrajsinh.in" target="_blank" rel="noopener noreferrer"
           >shivrajsinh.in${icon('external', 'i i-xs')}</a></span>
@@ -276,10 +269,8 @@ function onClick(e) {
       emit('lang-changed', value);
     } else if (set === 'refresh') {
       store.settings.set({ refresh: +value });
-    } else if (set === 'smartSafety') {
-      store.settings.set({ smartSafety: value === 'on' });
     } else if (set === 'stats') {
-      // Turning it off must also drop whatever is already queued â€” flushing on the way out
+      // Turning it off must also drop whatever is already queued — flushing on the way out
       // would send exactly the batch the rider just said no to.
       store.settings.set({ stats: value === 'on' });
       if (value === 'on') stats.track('screen:settings'); else stats.discard();
@@ -312,13 +303,13 @@ function onClick(e) {
 /**
  * Fires one real notification at this device, through the push service.
  *
- * Deliberately the whole round trip rather than a local `showNotification` â€” a local one proves
+ * Deliberately the whole round trip rather than a local `showNotification` — a local one proves
  * only that the tab is awake, which is never the case when an arrival alert matters. This goes
  * out to FCM or APNs and comes back, so a success here means alerts will genuinely arrive with
  * the app closed and the phone locked.
  */
 async function sendTestNotification(row) {
-  // Feedback goes through the toast, and the row is only disabled â€” rewriting its label would
+  // Feedback goes through the toast, and the row is only disabled — rewriting its label would
   // destroy the nested hint element inside it.
   if (row) row.disabled = true;
 
@@ -341,5 +332,3 @@ async function sendTestNotification(row) {
     if (row) row.disabled = false;
   }
 }
-
-
